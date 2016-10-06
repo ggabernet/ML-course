@@ -5,7 +5,6 @@ import numpy as np
 
 y_train = np.genfromtxt("targets.csv")
 
-# for n in range(1, 176, 10):
 X_train=[]
 for i in range(1, 279):
 	example = nib.load("set_train/train_"+str(i)+".nii")
@@ -15,13 +14,6 @@ for i in range(1, 279):
 	Iflat = I.flatten(order='C')
 	X_train.append(Iflat)
 X_train
-
-	# X_train = np.array(X_train)
-	# std_mat = np.std(X_train, axis=0)
-	# print std_mat
-	# print "hello"
-	# plt.matshow(std_mat)
-	# plt.savefig("std_mat%d.png" %n)
 
 
 # --------- SVM model ---------------------------
