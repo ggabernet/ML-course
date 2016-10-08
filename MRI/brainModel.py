@@ -23,7 +23,7 @@ X_train, X_test, y_train, y_test = \
 		train_test_split(Data, Targets, test_size=0.33, random_state=42)
 
 
-# Pipeline that scales (StandardScaler()), performes dimensionality reduction with PCA and trains a support vector
+# Pipeline that scales (StandardScaler()), performs dimensionality reduction with PCA and trains a support vector
 # regression machine classifier.
 pipe_svr = Pipeline([('scl', StandardScaler()),
 						('pca', PCA(n_components=100)),
