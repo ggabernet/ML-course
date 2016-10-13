@@ -5,7 +5,7 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 from sklearn.pipeline import Pipeline
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 
 Targets = np.genfromtxt("data/targets.csv")
 
