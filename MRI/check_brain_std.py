@@ -18,4 +18,4 @@ for n in range(1, 176, 10):
 	print std_mat
 	print "hello"
 	plt.matshow(std_mat)
-	plt.savefig("std_mat%d.png" %n)
+	plt.savefig("output/std/std_mat%d.png" %n)
