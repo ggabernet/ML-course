@@ -7,13 +7,36 @@ class Contours:
         self.intensity = intensity
         self.min_size = min_size
         self.layers_x_dim = layers_x_dim
-        self.contours = []
-        self.n_contours = []
-        self.biggest_cluster_size = []
         self.descriptor = []
 
+    def calculate_descriptor(self, X):
+        descriptor = []
 
-    def get_layer_contours_(self, layer):
+        for n in X:
+            xlay = np.linspace(1, n.shape[0] - 1, self.layers_x_dim, dtype=int)
+            ylay = np.linspace(1, n.shape[1] - 1, self.layers_x_dim, dtype=int)
+            zlay = np.linspace(1, n.shape[2] - 1, self.layers_x_dim, dtype=int)
+            desc = []
+            for x in xlay:
+                layer = n[x, :, :]
+                contours = self._get_layer_contours(layer)
+                desc.append(self._get_contour_number(contours))
+                desc.append(self._get_biggest_contour_area(contours))
+            for y in ylay:
+                layer = n[:, y, :]
+                contours = self._get_layer_contours(layer)
+                desc.append(self._get_contour_number(contours))
+                desc.append(self._get_biggest_contour_area(contours))
+            for z in zlay:
+                layer = n[:, :, z]
+                contours = self._get_layer_contours(layer)
+                desc.append(self._get_contour_number(contours))
+                desc.append(self._get_biggest_contour_area(contours))
+            descriptor.append(desc)
+        self.descriptor = np.asarray(descriptor)
+        return self
+
+    def _get_layer_contours(self, layer):
         layer_contours_ = []
         all_contours = measure.find_contours(layer, self.intensity)
         for c in all_contours:
@@ -21,20 +44,25 @@ class Contours:
                 layer_contours_.append(c)
         return layer_contours_
 
-    def get_layer_contour_number_(self, layer):
-        contours = self.get_layer_contours_(layer)
-        n_contours = len(contours)
-        return n_contours
+    def _get_contour_number(self, contours):
+        return len(contours)
 
-    def get_contour_area_(self, contour):
-        x_coord = np.asarray(c[:, 0])
-        y_coord = np.asarray(c[:, 1])
-        y_next = np.roll(y_coord, -1)
-        y_diff = [abs(x) for x in (y_next - y_coord)]
+    def _get_biggest_contour_area(self, contours):
+        areas = []
+        for contour in contours:
+            x_coord = np.asarray(contour[:, 0])
+            y_coord = np.asarray(contour[:, 1])
+            y_next = np.roll(y_coord, -1)
+            y_diff = [abs(x) for x in (y_next - y_coord)]
+            area = np.sum(np.prod([x_coord, y_diff], axis=0))
+            areas.append(area)
+        if areas:
+            a = np.max(areas)
+        else:
+            a = 0
+        return a
 
-        return np.sum(np.prod([x_coord, y_diff], axis=0))
-
-    def plot_layer_2D_contours_(self, X):
+    def _plot_layer_2D_contours(self, X):
         for n in range(len(X)):
             fig, ax = plt.subplots()
             ax.imshow(X[n], interpolation='nearest', cmap=plt.cm.gray)
