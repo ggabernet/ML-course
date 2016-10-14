@@ -1,3 +1,4 @@
 .idea/
 MRI/data/
 MRI/output/
+*.pyc
