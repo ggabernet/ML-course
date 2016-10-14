@@ -21,7 +21,7 @@ X_train, X_test, y_train, y_test = \
 		train_test_split(Data, Targets, test_size=0.33, random_state=42)
 
 for n in range(1, 13):
-	contours = measure.find_contours(X_train[n], 0.55)
+	contours = measure.find_contours(X_train[n], 900)
 	bigcontours = []
 	for c in contours:
 		if c.shape[0] > 100:
