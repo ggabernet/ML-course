@@ -11,8 +11,8 @@ class Contours:
 
     def get_2D_contours(self, X):
         self.contours = []
-        for n in len(X):
-            all_contours = measure.find_contours(X[n])
+        for n in range(len(X)):
+            all_contours = measure.find_contours(X[n], self.intensity)
             sample_contours = []
             for c in all_contours:
                 if c.shape[0] > self.min_size:
