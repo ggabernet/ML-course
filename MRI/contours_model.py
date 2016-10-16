@@ -59,15 +59,17 @@ print("MRSE score train data: " + str(MRSE_train))
 
 
 Data_test = []
-for i in range(1, 138):
+for i in range(1, 139):
     imagefile = nib.load("data/set_test/test_"+str(i)+".nii")
     image = imagefile.get_data()
     I = image[:, :, :, 0]
     Data_test.append(I)
 
-X_real_test = cnt.calculate_descriptor(Data_test)
+cnt.calculate_descriptor(Data_test)
+X_real_test = cnt.descriptor
+predictions = best_pipe.predict(X_real_test)
 
-with open("Submission.csv",mode='w') as f:
-    for idx, pred in enumerate(best_pipe.predict(X_real_test)):
-        f.write("ID,Prediction")
-        f.write(str(idx)+','+str(pred))
+with open("Submission.csv", mode='w') as f:
+    f.write("ID,Prediction\n")
+    for idx, pred in enumerate(predictions):
+        f.write(str(idx+1)+','+str(pred)+'\n')
