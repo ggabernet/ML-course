@@ -21,17 +21,26 @@ class Contours:
                 layer = n[x, :, :]
                 contours = self._get_layer_contours(layer)
                 desc.append(self._get_contour_number(contours))
-                desc.append(self._get_biggest_contour_area(contours))
+                #desc.append(self._get_biggest_contour_area(contours))
+                desc.append(self._get_biggest_minus_n_biggest_contour_areas(contours, 1))
+                desc.append(self._get_biggest_minus_n_biggest_contour_areas(contours, 2))
+                desc.append(self._get_biggest_minus_n_biggest_contour_areas(contours, 3))
             for y in ylay:
                 layer = n[:, y, :]
                 contours = self._get_layer_contours(layer)
                 desc.append(self._get_contour_number(contours))
-                desc.append(self._get_biggest_contour_area(contours))
+                #desc.append(self._get_biggest_contour_area(contours))
+                desc.append(self._get_biggest_minus_n_biggest_contour_areas(contours, 1))
+                desc.append(self._get_biggest_minus_n_biggest_contour_areas(contours, 2))
+                desc.append(self._get_biggest_minus_n_biggest_contour_areas(contours, 3))
             for z in zlay:
                 layer = n[:, :, z]
                 contours = self._get_layer_contours(layer)
                 desc.append(self._get_contour_number(contours))
-                desc.append(self._get_biggest_contour_area(contours))
+                #desc.append(self._get_biggest_contour_area(contours))
+                desc.append(self._get_biggest_minus_n_biggest_contour_areas(contours, 1))
+                desc.append(self._get_biggest_minus_n_biggest_contour_areas(contours, 2))
+                desc.append(self._get_biggest_minus_n_biggest_contour_areas(contours, 3))
             descriptor.append(desc)
         self.descriptor = np.asarray(descriptor)
         return self
@@ -61,6 +70,52 @@ class Contours:
         else:
             a = 0
         return a
+
+    def _get_biggest_minus_second_biggest_contour_area(self, contours):
+        areas = []
+        for contour in contours:
+            x_coord = np.asarray(contour[:, 0])
+            y_coord = np.asarray(contour[:, 1])
+            y_next = np.roll(y_coord, -1)
+            y_diff = [abs(x) for x in (y_next - y_coord)]
+            area = np.sum(np.prod([x_coord, y_diff], axis=0))
+            areas.append(area)
+        if areas:
+            a = np.max(areas)
+            smallerareas = areas.remove(np.max(areas))
+            b = np.max(smallerareas)
+            if b:
+                area = a-b
+            else:
+                area = a
+        else:
+            area = 0
+        return area
+
+    def _get_biggest_minus_n_biggest_contour_areas(self, contours, n):
+        areas = []
+        for contour in contours:
+            x_coord = np.asarray(contour[:, 0])
+            y_coord = np.asarray(contour[:, 1])
+            y_next = np.roll(y_coord, -1)
+            y_diff = [abs(x) for x in (y_next - y_coord)]
+            area = np.sum(np.prod([x_coord, y_diff], axis=0))
+            areas.append(area)
+        i = 0
+        while i < n:
+            if areas:
+                a = np.max(areas)
+                areas.remove(np.max(areas))
+                if areas:
+                    b = np.max(areas)
+                    area = a - b
+                else:
+                    area = a
+            else:
+                area = 0
+            i += 1
+        return area
+
 
     def _plot_layer_2D_contours(self, X):
         for n in range(len(X)):
