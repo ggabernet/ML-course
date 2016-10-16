@@ -8,7 +8,7 @@ import os
 from sklearn import preprocessing
 from sklearn.pipeline import Pipeline
 from sklearn.cross_validation import train_test_split
-
+from skimage.filters import *
 from skimage.feature import greycomatrix, greycoprops
 
 Targets = np.genfromtxt("data/targets.csv")
@@ -18,6 +18,7 @@ for i in range(1, 279):
 	example = nib.load("data/set_train/train_"+str(i)+".nii")
 	image = example.get_data()
 	I = image[:, :, 91, 0]
+	I=skimage.filters.g
 	np.asarray(I)
 	Iflat = I.flatten(order='C')
 	X_train.append(Iflat)
