@@ -1,6 +1,7 @@
 from skimage import measure
 import matplotlib.pyplot as plt
 import nibabel as nib
+from nibabel import processing as pr
 import numpy as np
 from sklearn.cross_validation import train_test_split
 from feature_extraction import Contours
@@ -24,5 +25,3 @@ X_train, X_test, y_train, y_test = \
 cnt = Contours(1000, 100)
 contours = cnt.get_2D_contours(X_train)
 print contours
-
-cnt.plot_2D_contours(X_train)
