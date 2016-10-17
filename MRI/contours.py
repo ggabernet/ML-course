@@ -13,7 +13,7 @@ X_train = []
 for i in range(1, 279):
 	example = nib.load("data/set_train/train_"+str(i)+".nii")
 	image = example.get_data()
-	I = image[:, :, 90, 0]
+	I = image[:, :, 88, 0]
 	X_train.append(I)
 Data = X_train
 
@@ -21,10 +21,10 @@ X_train, X_test, y_train, y_test = \
 		train_test_split(Data, Targets, test_size=0.33, random_state=42)
 
 for n in range(1, 13):
-	contours = measure.find_contours(X_train[n], 0.55)
+	contours = measure.find_contours(X_train[n], 800)
 	bigcontours = []
 	for c in contours:
-		if c.shape[0] > 100:
+		if c.shape[0] > 50:
 			bigcontours.append(c)
 
 	fig, ax = plt.subplots()
