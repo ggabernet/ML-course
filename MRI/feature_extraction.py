@@ -2,6 +2,38 @@ from skimage import measure
 import matplotlib.pyplot as plt
 import numpy as np
 
+
+class Intensities:
+    def __init__(self, layers_x_dim):
+        self.layers_x_dim = layers_x_dim
+
+    def calculate_descriptor(self, X):
+        descriptor= []
+        for n in X:
+            xlay = np.linspace(1, n.shape[0] - 1, self.layers_x_dim, dtype=int)
+            ylay = np.linspace(1, n.shape[1] - 1, self.layers_x_dim, dtype=int)
+            zlay = np.linspace(1, n.shape[2] - 1, self.layers_x_dim, dtype=int)
+            desc = []
+            for x in xlay:
+                layer = n[x, :, :]
+                desc.append(self._get_layer_intensity_sum(layer))
+            for y in ylay:
+                layer = n[:, y, :]
+                desc.append(self._get_layer_intensity_sum(layer))
+            for z in zlay:
+                layer = n[:, :, z]
+                desc.append(self._get_layer_intensity_sum(layer))
+            descriptor.append(desc)
+        self.descriptor = np.asarray(descriptor)
+        return self
+
+    def _get_layer_intensity_sum(self, layer):
+        layerArray = np.asarray(layer)
+        layerFlat = layerArray.flatten(order='C')
+        intensity = np.sum(layerFlat)/np.size(layerFlat)
+        return intensity
+
+
 class Contours:
     def __init__(self, intensity, min_size, layers_x_dim):
         self.intensity = intensity
