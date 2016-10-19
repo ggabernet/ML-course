@@ -1,0 +1,5 @@
+(186, 33)
+{'var__threshold': 0, 'pca__n_components': 25, 'clf__alpha': 7.0}
+Score R^2: 0.775753035887
+MRSE score test data: 138.230767199
+MRSE score train data: 155.374412616
