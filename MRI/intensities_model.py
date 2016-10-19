@@ -10,7 +10,7 @@ from sklearn.metrics import *
 from sklearn.linear_model import Lasso
 from sklearn.grid_search import GridSearchCV
 from sklearn.svm import SVR
-from sklearn.decomposition import PCA
+from sklearn.decomposition import PCA, RandomizedPCA
 
 Targets = np.genfromtxt("data/targets.csv")
 
@@ -24,21 +24,23 @@ for i in range(1, 279):
 X_train, X_test, y_train, y_test = \
     train_test_split(Data, Targets, test_size=0.33, random_state=42)
 
-cnt = Intensities(layers_x_dim=11)
-cnt.calculate_descriptor(X_train)
+cnt = Intensities()
+cnt.calculate_intensity_layers(X_train, layers_x_dim=11)
 desc_train = cnt.descriptor
-cnt.calculate_descriptor(X_test)
+cnt.calculate_intensity_layers(X_test, layers_x_dim=11)
 desc_test = cnt.descriptor
 
 print desc_train.shape
 
-pipe = Pipeline([('var', VarianceThreshold(threshold=0.5)),
-                 ('pca', PCA(n_components=20)),
-                 ('clf', SVR(kernel='linear'))])
+pipe = Pipeline([('var', VarianceThreshold(threshold=0)),
+                 ('pca', RandomizedPCA(n_components=10)),
+                 ('clf', Lasso())])
 param_range_svm = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0, 10, 100]
 param_range_lasso = np.linspace(0, 10, 11)
 gs = GridSearchCV(estimator=pipe,
-                  param_grid=[{'clf__C': [0.1]}],
+                  param_grid=[{'var__threshold': [0, 0.1, 0.2, 0.3, 0.4, 0.5],
+                               'clf__alpha': param_range_lasso,
+                               'pca__n_components': np.linspace(1,33,33, dtype=int)}],
                   cv=5,
                   n_jobs=-1)
 
@@ -67,7 +69,7 @@ for i in range(1, 139):
     I = image[:, :, :, 0]
     Data_test.append(I)
 
-cnt.calculate_descriptor(Data_test)
+cnt.calculate_intensity_layers(Data_test, layers_x_dim=11)
 X_real_test = cnt.descriptor
 predictions = best_pipe.predict(X_real_test)
 

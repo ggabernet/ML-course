@@ -4,10 +4,12 @@ import numpy as np
 
 
 class Intensities:
-    def __init__(self, layers_x_dim):
-        self.layers_x_dim = layers_x_dim
+    def __init__(self):
+        self.layers_x_dim = []
+        self.cubes_x_dim = []
 
-    def calculate_descriptor(self, X):
+    def calculate_intensity_layers(self, X, layers_x_dim):
+        self.layers_x_dim = layers_x_dim
         descriptor= []
         for n in X:
             xlay = np.linspace(1, n.shape[0] - 1, self.layers_x_dim, dtype=int)
@@ -26,6 +28,21 @@ class Intensities:
             descriptor.append(desc)
         self.descriptor = np.asarray(descriptor)
         return self
+
+    def calculate_intensity_cubes(self, X, cubes_x_dim):
+        self.cubes_x_dim = cubes_x_dim
+        descriptor = []
+        for n in X:
+            xidx = np.linspace(0, n.shape[0] - 1, self.cubes_x_dim, dtype=int)
+            yidx = np.linspace(0, n.shape[1] - 1, self.cubes_x_dim, dtype=int)
+            zidx = np.linspace(0, n.shape[2] - 1, self.cubes_x_dim, dtype=int)
+            desc = []
+            for x in xidx:
+                for y in yidx:
+                    for z in zidx:
+                        desc.append(np.sum())
+
+
 
     def _get_layer_intensity_sum(self, layer):
         layerArray = np.asarray(layer)
