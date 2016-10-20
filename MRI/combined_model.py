@@ -46,7 +46,7 @@ desc_test = filter.flatten(filter.transformed)
 
 print desc_train.shape
 
-pipe = Pipeline([('var', VarianceThreshold(threshold=0)),
+pipe = Pipeline([('scl', StandardScaler()),
                  ('pca', PCA(n_components=100)),
                  ('clf', SVR(kernel='linear'))])
 param_range_svm = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0, 10, 100]
