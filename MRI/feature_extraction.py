@@ -5,8 +5,7 @@ import numpy as np
 
 class Intensities:
     def __init__(self):
-        self.layers_x_dim = []
-        self.cubes_x_dim = []
+        self.descriptor = []
 
     def calculate_intensity_layers(self, X, layers_x_dim):
         self.layers_x_dim = layers_x_dim
@@ -18,36 +17,44 @@ class Intensities:
             desc = []
             for x in xlay:
                 layer = n[x, :, :]
-                desc.append(self._get_layer_intensity_sum(layer))
+                desc.append(self._get_array_intensity_sum(layer))
             for y in ylay:
                 layer = n[:, y, :]
-                desc.append(self._get_layer_intensity_sum(layer))
+                desc.append(self._get_array_intensity_sum(layer))
             for z in zlay:
                 layer = n[:, :, z]
-                desc.append(self._get_layer_intensity_sum(layer))
+                desc.append(self._get_array_intensity_sum(layer))
             descriptor.append(desc)
         self.descriptor = np.asarray(descriptor)
         return self
 
-    def calculate_intensity_cubes(self, X, cubes_x_dim):
-        self.cubes_x_dim = cubes_x_dim
+    def calculate_intensity_cubes(self, X, size_cubes, iterations=5):
+        it = iterations
+        size_cubes = size_cubes
         descriptor = []
+        cubes_edge = it * 2 - 1
         for n in X:
-            xidx = np.linspace(0, n.shape[0] - 1, self.cubes_x_dim, dtype=int)
-            yidx = np.linspace(0, n.shape[1] - 1, self.cubes_x_dim, dtype=int)
-            zidx = np.linspace(0, n.shape[2] - 1, self.cubes_x_dim, dtype=int)
-            desc = []
-            for x in xidx:
-                for y in yidx:
-                    for z in zidx:
-                        desc.append(np.sum())
+            # first center cube
+            x1 = n.shape[0] / 2 - size_cubes * cubes_edge / 2
+            x2 = n.shape[0] / 2 + size_cubes * cubes_edge / 2
+            y1 = n.shape[1] / 2 - size_cubes * cubes_edge / 2
+            y2 = n.shape[1] / 2 + size_cubes * cubes_edge / 2
+            z1 = n.shape[2] / 2 - size_cubes * cubes_edge / 2
+            z2 = n.shape[2] / 2 + size_cubes * cubes_edge / 2
+            int_cubes = []
+            for i in range(x1, x2, size_cubes):
+                for j in range(y1, y2, size_cubes):
+                    for k in range(z1, z2, size_cubes):
+                        cube = n[i:i + size_cubes, j:j + size_cubes, k:k + size_cubes]
+                        int_cubes.append(self._get_array_intensity_sum(cube))
+            descriptor.append(int_cubes)
+        self.descriptor = np.asarray(descriptor)
+        return self
 
-
-
-    def _get_layer_intensity_sum(self, layer):
-        layerArray = np.asarray(layer)
-        layerFlat = layerArray.flatten(order='C')
-        intensity = np.sum(layerFlat)/np.size(layerFlat)
+    def _get_array_intensity_sum(self, array):
+        arrArray = np.asarray(array)
+        arrFlat = arrArray.flatten(order='C')
+        intensity = np.sum(arrFlat)/np.size(arrFlat)
         return intensity
 
 

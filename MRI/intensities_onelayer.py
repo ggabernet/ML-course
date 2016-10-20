@@ -13,42 +13,73 @@ for i in range(1, 2):
 
 print I.shape
 
-a, b, c = 9, 9, 3
-aaa, bbb = 3, 3
-arr = np.arange(a*b*c).reshape(a, b, c)
+iterations = 3
+size_cubes = 10
 
-print arr.shape
+cubes = []
+#first center cube
+x1 = I.shape[0]/2 - size_cubes/2
+x2 = I.shape[0]/2 + size_cubes/2
+y1 = I.shape[1]/2 - size_cubes/2
+y2 = I.shape[1]/2 + size_cubes/2
+z1 = I.shape[2]/2 - size_cubes/2
+z2 = I.shape[2]/2 + size_cubes/2
 
-arr_view = arr.reshape(a//aaa, aaa, b//bbb, bbb, c)
-print arr_view.shape
+x = (x1,x2)
+y = (y1,y2)
+z = (z1,z2)
 
-arr_grid = np.swapaxes(arr_view, 1, 2).reshape(-1, aaa, bbb, c)
-print arr_grid.shape
+I_center = I[x[0]:x[1], y[0]:y[1], z[0]:z[1]]
 
-arr_view = np.swapaxes(arr_view, 1, 2)
-print arr_view.shape
-arr_grid = [arr_view[j] for j in zip(*np.unravel_index(np.arange(a*b//aaa//bbb),
-                                                       (a//aaa, b//bbb)))]
+cubes.append(I_center)
 
-for i in arr_grid:
-    print i.shape
+print I_center.shape
+print I_center
 
-n_cubes = 10
+# 3x3 cubes
+#p
+xp1 = x2
+xp2 = x2 + size_cubes
+xp = (xp1, xp2)
+yp1 = y2
+yp2 = y2 + size_cubes
+yp = (yp1, yp2)
+zp1 = z2
+zp2 = z2 + size_cubes
+zp = (zp1, zp2)
+#n
+xn1 = x1 - size_cubes
+xn2 = x1
+xn = (xn1, xn2)
+yn1 = y1 - size_cubes
+yn2 = y1
+yn = (yn1, yn2)
+zn1 = z1 - size_cubes
+zn2 = z1
+zn = (zn1, zn2)
 
-I_red = I[(I.shape[0] % n_cubes)/2:-(I.shape[0] % n_cubes)/2, (I.shape[1] % n_cubes)/2:-(I.shape[1] % n_cubes)/2, (I.shape[2] % n_cubes)/2:-(I.shape[2] % n_cubes)/2]
+loop_x = [x, xp, xn]
+loop_y = [y, yp, yn]
+loop_z = [z, zp, zn]
 
-print I_red.shape
+for i in loop_x:
+    for j in loop_y:
+        for k in loop_z:
+            cube = I[i[0]:i[1], j[0]:j[1], k[0]:k[1]]
+            cubes.append(cube)
 
-grids = []
-for i in range(0, I_red.shape[1], I_red.shape[1]/n_cubes):
-    grids.append(I_red[:, i:i+I_red.shape[1]/n_cubes, :])
-for i in grids:
-    print i.shape
+# 5x5 cubes
+x1 = xn1
+x2 = xp2
+y1 = yn1
+y2 = yp2
+z1 = zn1
+z2 = zp2
 
-for i in grids:
-    I_arr = np.arange(i.shape[0]*i.shape[1]*i.shape[2]).reshape(i.shape[0], i.shape[1], i.shape[2])
-    print I_arr.shape
-    I_arr_view = I_arr.reshape(i.shape[0]//(i.shape[0]/n_cubes), i.shape[0]/n_cubes, i.shape[1], i.shape[2]//(i.shape[2]/n_cubes), i.shape[2]/n_cubes)
-    print I_arr_view.shape
-    I_arr_view = np.swapaxes(arr_view, 1, 3).reshape(-1, i.shape[0]/n_cubes, i.shape[1], i.shape[2]/n_cubes)
-    print I_arr_view.shape
+
+
+print len(cubes)
+for cube in cubes:
+    print cube.shape
+
+
