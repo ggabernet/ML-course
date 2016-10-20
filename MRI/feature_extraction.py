@@ -1,6 +1,83 @@
 from skimage import measure
 import matplotlib.pyplot as plt
 import numpy as np
+from skimage.filters import sobel, scharr, prewitt
+
+
+class CenterCut:
+    def __init__(self):
+        self.cut = []
+    def make_cut(self, X):
+        cut = []
+        for n in X:
+            cut.append(n[50:120,50:150,50:100])
+        self.cut = cut
+        return self
+
+
+class Covariance:
+    def __init__(self):
+        self.cov_matrix = []
+
+    def calculate_covariance(self, X, y):
+        data = []
+        for n in X:
+            data.append(n.flatten(order='C'))
+        data = np.asarray(data)
+        cov_mat = []
+        for i in range(1,data.shape[1]):
+            cov = np.mean(np.dot(data[i,:],y))-np.mean(data[i,:])*np.mean(y)
+            cov_mat.append(cov)
+        self.cov_matrix = cov_mat
+        return self
+
+
+class Filtering:
+    def __init__(self):
+        self.transformed = []
+
+    def calculate_prewitt(self, X):
+        trans = []
+        for n in X:
+            p = []
+            for i in range(0, n.shape[2]):
+                layer=n[:,:,i]
+                p.append(prewitt(layer))
+            trans.append(np.asarray(p))
+        self.transformed = np.asarray(trans)
+        return self
+
+    def calculate_scharr(self, X, axis=0):
+        axis = axis
+        trans = []
+        for n in X:
+            p = []
+            for i in range(0, n.shape[axis]):
+                layer = n[:, :, i]
+                p.append(scharr(layer))
+            trans.append(np.asarray(p))
+        self.transformed = np.asarray(trans)
+        return self
+
+    def calculate_sobel(self, X, axis=0):
+        axis = axis
+        trans = []
+        for n in X:
+            p = []
+            for i in range(0, n.shape[axis]):
+                layer = n[:, :, i]
+                p.append(sobel(layer))
+            trans.append(np.asarray(p))
+        self.transformed = np.asarray(trans)
+        return self
+
+    def flatten(self, X):
+        flat = []
+        for n in X:
+            flat.append(n.flatten(order='C'))
+        return np.asarray(flat)
+
+# TODO: add gaussian preprocessing
 
 
 class Intensities:
