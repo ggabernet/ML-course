@@ -10,7 +10,7 @@ class CenterCut:
     def __init__(self):
         self.cut = []
         self.descriptor = []
-    def make_cut(self, X, x1, x2, y1, y2, z1, z2):
+    def make_cut(self, X, x1=50, x2=120, y1=50, y2=150, z1=50, z2=100):
         cut = []
         for n in X:
             cut.append(n[x1:x2,y1:y2,z1:z2])
@@ -42,8 +42,9 @@ class CenterCut:
         intensity = np.max(arrFlat)
         return intensity
 
+
 class CenterCutCubes(BaseEstimator, TransformerMixin):
-    def __init(self, size_cubes, x1=50, x2=120, y1=50, y2=150, z1=50, z2=100):
+    def __init__(self, size_cubes, x1=50, x2=120, y1=50, y2=150, z1=50, z2=100):
         self.cut = []
         self.descriptor = []
         self.x1 = x1
