@@ -26,6 +26,16 @@ class CenterCut:
 
         self.descriptor = np.asarray(descriptor)
         return self
+    def _get_array_intensity_sum(self, array):
+        arrArray = np.asarray(array)
+        arrFlat = arrArray.flatten(order='C')
+        intensity = np.sum(arrFlat)/np.size(arrFlat)
+        return intensity
+    def _get_array_intensity_max(self, array):
+        arrArray = np.asarray(array)
+        arrFlat = arrArray.flatten(order='C')
+        intensity = np.max(arrFlat)
+        return intensity
 
 class CheckrPixl:
     def __init__(self):
