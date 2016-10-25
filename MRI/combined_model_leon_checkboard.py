@@ -1,7 +1,7 @@
 from skimage import measure
 import numpy as np
 import nibabel as nib
-from feature_extraction import Intensities, CenterCut, CheckrPixl, Covariance, Filtering, Contours
+from feature_extraction_leon import Intensities, CenterCut, CheckrPixl, Covariance, Filtering, Contours
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
