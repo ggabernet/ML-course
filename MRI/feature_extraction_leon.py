@@ -2,18 +2,15 @@ from skimage import measure
 import matplotlib.pyplot as plt
 import numpy as np
 from skimage.filters import sobel, scharr, prewitt
-from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.decomposition import PCA
 
 
 class CenterCut:
     def __init__(self):
         self.cut = []
-        self.descriptor = []
-    def make_cut(self, X, x1, x2, y1, y2, z1, z2):
+    def make_cut(self, X):
         cut = []
         for n in X:
-            cut.append(n[x1:x2,y1:y2,z1:z2])
+            cut.append(n[50:120,50:150,50:100])
         self.cut = cut
         return self
     def make_cubes(self, X, size_cubes):
@@ -29,64 +26,6 @@ class CenterCut:
 
         self.descriptor = np.asarray(descriptor)
         return self
-
-    def _get_array_intensity_sum(self, array):
-        arrArray = np.asarray(array)
-        arrFlat = arrArray.flatten(order='C')
-        intensity = np.sum(arrFlat)/np.size(arrFlat)
-        return intensity
-
-    def _get_array_intensity_max(self, array):
-        arrArray = np.asarray(array)
-        arrFlat = arrArray.flatten(order='C')
-        intensity = np.max(arrFlat)
-        return intensity
-
-class CenterCutCubes(BaseEstimator, TransformerMixin):
-    def __init(self, size_cubes, x1=50, x2=120, y1=50, y2=150, z1=50, z2=100):
-        self.cut = []
-        self.descriptor = []
-        self.x1 = x1
-        self.x2 = x2
-        self.y1 = y1
-        self.y2 = y2
-        self.z1 = z1
-        self.z2 = z2
-        self.size_cubes = size_cubes
-
-    def fit(self, X_train, y=None):
-
-        return self
-
-    def transform(self, X_train, y=None):
-        cut = []
-        for n in X_train:
-            cut.append(n[self.x1:self.x2, self.y1:self.y2, self.z1:self.z2])
-        self.cut = cut
-        descriptor = []
-        for n in X_train:
-            int_cubes = []
-            for i in range(0, n.shape[0], self.size_cubes):
-                for j in range(0, n.shape[1], self.size_cubes):
-                    for k in range(0, n.shape[2], self.size_cubes):
-                        cube = n[i:i + self.size_cubes, j:j + self.size_cubes, k:k + self.size_cubes]
-                        int_cubes.append(self._get_array_intensity_max(cube))
-            descriptor.append(int_cubes)
-
-        self.descriptor = np.asarray(descriptor)
-        return self.descriptor
-
-    def _get_array_intensity_sum(self, array):
-        arrArray = np.asarray(array)
-        arrFlat = arrArray.flatten(order='C')
-        intensity = np.sum(arrFlat) / np.size(arrFlat)
-        return intensity
-
-    def _get_array_intensity_max(self, array):
-        arrArray = np.asarray(array)
-        arrFlat = arrArray.flatten(order='C')
-        intensity = np.max(arrFlat)
-        return intensity
 
 class CheckrPixl:
     def __init__(self):
@@ -168,47 +107,6 @@ class Filtering:
 
 # TODO: add gaussian preprocessing
 
-class CovSel(BaseEstimator, TransformerMixin):
-    def __init__(self, cut_off=0.5):
-        self.cut_off = cut_off
-
-    def fit(self, X_train, y=None):
-        pca = PCA(n_components=X_train.shape[1])
-        pca.fit(X_train)
-        self.covariance = pca.get_covariance()
-        self.importance = pca.components_[1]
-
-        x, y = np.where(self.covariance > self.cut_off)
-
-        keep = []
-        trash = []
-
-        for n in x:
-            if n not in keep and n not in trash:
-                corr_feats = y[np.where(x == n)]
-                new_corr_feats = []
-                for feat in corr_feats:
-                    if feat not in keep and feat not in trash:
-                        new_corr_feats.append(feat)
-                contrib_corr_feats = self.importance[new_corr_feats]
-                max_contrib = new_corr_feats[np.argmax(abs(contrib_corr_feats))]
-                if max_contrib not in keep:
-                    keep.append(max_contrib)
-                for i in new_corr_feats:
-                    if i not in keep:
-                        trash.append(i)
-        self.cov_selected_ = keep
-
-        for m in range(X_train.shape[1]):
-            if m not in keep and m not in trash:
-                keep.append(m)
-        keep.sort()
-        self.indices_ = keep
-
-        return self
-
-    def transform(self, X, y=None):
-        return X[:, self.indices_]
 
 class Intensities:
     def __init__(self):
@@ -253,30 +151,7 @@ class Intensities:
                 for j in range(y1, y2, size_cubes):
                     for k in range(z1, z2, size_cubes):
                         cube = n[i:i + size_cubes, j:j + size_cubes, k:k + size_cubes]
-                        int_cubes.append(self._get_array_intensity_max(cube))
-            descriptor.append(int_cubes)
-        self.descriptor = np.asarray(descriptor)
-        return self
-
-    def calculate_intensity_prism(self, X, size_cubes, ncubes_x, ncubes_y):
-        size_cubes = size_cubes
-        ncubes_x = ncubes_x
-        ncubes_y = ncubes_y
-        ncubes_z = ncubes_x
-        descriptor = []
-        for n in X:
-            x1 = n.shape[0] / 2 - size_cubes * ncubes_x / 2
-            x2 = n.shape[0] / 2 + size_cubes * ncubes_x / 2
-            y1 = n.shape[1] / 2 - size_cubes * ncubes_y / 2
-            y2 = n.shape[1] / 2 + size_cubes * ncubes_y / 2
-            z1 = n.shape[2] / 2 - size_cubes * ncubes_z / 2
-            z2 = n.shape[2] / 2 + size_cubes * ncubes_z / 2
-            int_cubes = []
-            for i in range(x1, x2, size_cubes):
-                for j in range(y1, y2, size_cubes):
-                    for k in range(z1, z2, size_cubes):
-                        cube = n[i:i + size_cubes, j:j + size_cubes, k:k + size_cubes]
-                        int_cubes.append(self._get_array_intensity_max(cube))
+                        int_cubes.append(self._get_array_intensity_sum(cube))
             descriptor.append(int_cubes)
         self.descriptor = np.asarray(descriptor)
         return self
@@ -285,12 +160,6 @@ class Intensities:
         arrArray = np.asarray(array)
         arrFlat = arrArray.flatten(order='C')
         intensity = np.sum(arrFlat)/np.size(arrFlat)
-        return intensity
-
-    def _get_array_intensity_max(self, array):
-        arrArray = np.asarray(array)
-        arrFlat = arrArray.flatten(order='C')
-        intensity = np.max(arrFlat)
         return intensity
 
 
