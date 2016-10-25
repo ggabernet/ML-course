@@ -12,6 +12,7 @@ from sklearn.linear_model import Lasso
 from sklearn.model_selection import GridSearchCV
 from sklearn.svm import SVR
 from sklearn.decomposition import PCA, RandomizedPCA
+from sklearn.ensemble import RandomForestRegressor
 
 Targets = np.genfromtxt("data/targets.csv")
 
@@ -47,12 +48,12 @@ print desc_train.shape
 pipe = Pipeline([('scl', StandardScaler()),
 				 ('var', VarianceThreshold()),
 				 ('pca', PCA(n_components=100)),
-				 ('clf', SVR(kernel='linear'))])
+				 ('clf', RandomForestRegressor(n_estimators=500, max_features='sqrt'))])
 param_range_svm = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0, 10, 100]
 param_range_lasso = np.linspace(0, 10, 11)
 gs = GridSearchCV(estimator=pipe,
-				  param_grid=[{'clf__C': [1],
-							   'pca__n_components': [200]}],
+				  param_grid=[{'clf__max_features': ['auto','sqrt','log2'],
+							   'pca__n_components': [250]}],
 				  cv=5,
 				  scoring=make_scorer(mean_squared_error),
 				  n_jobs=1)
@@ -65,8 +66,8 @@ print gs.best_params_
 means = gs.cv_results_['mean_test_score']
 stds = gs.cv_results_['std_test_score']
 for mean, std, params in zip(means, stds, gs.cv_results_['params']):
-	if params == gs.best_params_:
-		print("%0.3f (+/-%0.03f) for %r" % (mean, std * 2, params))
+	#if params == gs.best_params_:
+	print("%0.3f (+/-%0.03f) for %r" % (mean, std * 2, params))
 
 best_pipe.fit(desc_train, y_train)
 
