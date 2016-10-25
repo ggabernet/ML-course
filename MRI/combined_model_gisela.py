@@ -32,11 +32,8 @@ y_train = Targets
 
 cut = CenterCut()
 cut.make_cut(X_train)
-cut_train = cut.cut
-
-filter = Filtering()
-filter.calculate_prewitt(cut_train)
-desc_train = filter.flatten(filter.transformed)
+cut.make_cubes(cut.cut, size_cubes=5)
+desc_train = cut.descriptor
 
 # cut.make_cut(X_test)
 # cut_test = cut.cut
@@ -53,10 +50,11 @@ pipe = Pipeline([('scl', StandardScaler()),
 param_range_svm = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0, 10, 100]
 param_range_lasso = np.linspace(0, 10, 11)
 gs = GridSearchCV(estimator=pipe,
-                  param_grid=[{'clf__C': param_range_svm,
+                  param_grid=[{'clf__C': [0.1],
                                'pca__n_components': [250]}],
                   cv=5,
-                  n_jobs=1)
+                  n_jobs=1,
+                  scoring=make_scorer(mean_squared_error))
 
 gs.fit(desc_train, y_train)
 
@@ -92,10 +90,8 @@ for i in range(1, 139):
 
 
 cut.make_cut(Data_test)
-cut_real_test = cut.cut
-
-filter.calculate_prewitt(cut_real_test)
-desc_real_test = filter.flatten(filter.transformed)
+cut.make_cubes(cut.cut, size_cubes=5)
+desc_real_test = cut.descriptor
 
 predictions = best_pipe.predict(desc_real_test)
 

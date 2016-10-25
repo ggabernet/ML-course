@@ -7,12 +7,38 @@ from skimage.filters import sobel, scharr, prewitt
 class CenterCut:
     def __init__(self):
         self.cut = []
-    def make_cut(self, X):
+        self.descriptor = []
+    def make_cut(self, X, x1, x2, y1, y2, z1, z2):
         cut = []
         for n in X:
-            cut.append(n[50:120,50:150,50:100])
+            cut.append(n[x1:120,50:150,50:100])
         self.cut = cut
         return self
+    def make_cubes(self, X, size_cubes):
+        descriptor = []
+        for n in X:
+            int_cubes = []
+            for i in range(0, n.shape[0], size_cubes):
+                for j in range(0, n.shape[1], size_cubes):
+                    for k in range(0, n.shape[2], size_cubes):
+                        cube = n[i:i + size_cubes, j:j + size_cubes, k:k + size_cubes]
+                        int_cubes.append(self._get_array_intensity_max(cube))
+            descriptor.append(int_cubes)
+
+        self.descriptor = np.asarray(descriptor)
+        return self
+
+    def _get_array_intensity_sum(self, array):
+        arrArray = np.asarray(array)
+        arrFlat = arrArray.flatten(order='C')
+        intensity = np.sum(arrFlat)/np.size(arrFlat)
+        return intensity
+
+    def _get_array_intensity_max(self, array):
+        arrArray = np.asarray(array)
+        arrFlat = arrArray.flatten(order='C')
+        intensity = np.max(arrFlat)
+        return intensity
 
 
 class Covariance:
@@ -123,7 +149,30 @@ class Intensities:
                 for j in range(y1, y2, size_cubes):
                     for k in range(z1, z2, size_cubes):
                         cube = n[i:i + size_cubes, j:j + size_cubes, k:k + size_cubes]
-                        int_cubes.append(self._get_array_intensity_sum(cube))
+                        int_cubes.append(self._get_array_intensity_max(cube))
+            descriptor.append(int_cubes)
+        self.descriptor = np.asarray(descriptor)
+        return self
+
+    def calculate_intensity_prism(self, X, size_cubes, ncubes_x, ncubes_y):
+        size_cubes = size_cubes
+        ncubes_x = ncubes_x
+        ncubes_y = ncubes_y
+        ncubes_z = ncubes_x
+        descriptor = []
+        for n in X:
+            x1 = n.shape[0] / 2 - size_cubes * ncubes_x / 2
+            x2 = n.shape[0] / 2 + size_cubes * ncubes_x / 2
+            y1 = n.shape[1] / 2 - size_cubes * ncubes_y / 2
+            y2 = n.shape[1] / 2 + size_cubes * ncubes_y / 2
+            z1 = n.shape[2] / 2 - size_cubes * ncubes_z / 2
+            z2 = n.shape[2] / 2 + size_cubes * ncubes_z / 2
+            int_cubes = []
+            for i in range(x1, x2, size_cubes):
+                for j in range(y1, y2, size_cubes):
+                    for k in range(z1, z2, size_cubes):
+                        cube = n[i:i + size_cubes, j:j + size_cubes, k:k + size_cubes]
+                        int_cubes.append(self._get_array_intensity_max(cube))
             descriptor.append(int_cubes)
         self.descriptor = np.asarray(descriptor)
         return self
@@ -132,6 +181,12 @@ class Intensities:
         arrArray = np.asarray(array)
         arrFlat = arrArray.flatten(order='C')
         intensity = np.sum(arrFlat)/np.size(arrFlat)
+        return intensity
+
+    def _get_array_intensity_max(self, array):
+        arrArray = np.asarray(array)
+        arrFlat = arrArray.flatten(order='C')
+        intensity = np.max(arrFlat)
         return intensity
 
 

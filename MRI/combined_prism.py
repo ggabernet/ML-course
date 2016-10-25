@@ -3,7 +3,7 @@ import numpy as np
 import nibabel as nib
 from feature_extraction import Intensities, CenterCut, Covariance, Filtering, Contours
 import numpy as np
-#from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 from sklearn.feature_selection import VarianceThreshold
@@ -32,9 +32,10 @@ y_train = Targets
 #     train_test_split(Data, Targets, test_size=0.33, random_state=42)
 
 size_cubes = 5
-iterations = 8
+ncubes_x = 15
+ncubes_y = 15
 cubes = Intensities()
-cubes.calculate_intensity_cubes(X_train, size_cubes=size_cubes, iterations=iterations)
+cubes.calculate_intensity_prism(X_train, size_cubes=size_cubes, ncubes_x=ncubes_x, ncubes_y=ncubes_y)
 desc_train = cubes.descriptor
 
 # cut.make_cut(X_test)
@@ -47,7 +48,7 @@ print desc_train.shape
 
 pipe = Pipeline([('scl', StandardScaler()),
 				 ('var', VarianceThreshold()),
-				 ('pca', PCA(n_components=100)),
+				 ('pca', PCA(n_components=250)),
 				 ('clf', SVR(kernel='linear'))])
 param_range_svm = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0, 10, 100]
 param_range_lasso = np.linspace(0, 10, 11)
@@ -89,14 +90,14 @@ for i in range(1, 139):
 	image = imagefile.get_data()
 	I = image[:, :, :, 0]
 	Data_test.append(np.asarray(I))
+X_test = Data_test
 
-
-cubes.calculate_intensity_cubes(Data_test,size_cubes=size_cubes, iterations=iterations)
+cubes.calculate_intensity_prism(X_test, size_cubes=size_cubes, ncubes_x=ncubes_x, ncubes_y=ncubes_y)
 desc_real_test = cubes.descriptor
 
 predictions = best_pipe.predict(desc_real_test)
 
-with open("SubmissionCubes.csv", mode='w') as f:
+with open("SubmissionPrisms.csv", mode='w') as f:
 	f.write("ID,Prediction\n")
 	for idx, pred in enumerate(predictions):
 		f.write(str(idx+1)+','+str(pred)+'\n')
