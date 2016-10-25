@@ -4,7 +4,7 @@ import nibabel as nib
 from feature_extraction_leon import Intensities, CenterCut, CheckrPixl, Covariance, Filtering, Contours
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.pipeline import Pipeline
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.metrics import *
@@ -12,7 +12,7 @@ from sklearn.linear_model import LassoCV
 from sklearn.linear_model import SGDRegressor
 from sklearn.model_selection import GridSearchCV
 from sklearn.svm import SVR
-from sklearn.decomposition import PCA, RandomizedPCA
+from sklearn.decomposition import PCA, RandomizedPCA, KernelPCA
 from itertools import chain
 from sklearn.feature_selection import SelectFromModel
 from sklearn.feature_selection import RFECV
@@ -39,12 +39,12 @@ X_train,y_train=Data,Targets
 cut = CenterCut()
 cut.make_cut(X_train)
 cut_train = cut.cut
-#cut.make_cubes(cut.cut, size_cubes=5)
-#desc_train = cut.descriptor
-
-check = CheckrPixl()
-checker = check.make_checker(cut_train)
-desc_train = checker.checker
+cut.make_cubes(cut.cut, size_cubes=5)
+desc_train = cut.descriptor
+desc_train = desc_train.round(0)
+#check = CheckrPixl()
+#checker = check.make_checker(cut_train)
+#desc_train = checker.checker
 
 #filter = Filtering()
 #filter.calculate_prewitt(cut_train)
@@ -70,10 +70,10 @@ print desc_train.shape
 
 
 #('feature_selection', SelectFromModel(LassoCV(),threshold=0.001)),
-pipe = Pipeline([('scl', StandardScaler()),
+pipe = Pipeline([('scl', MinMaxScaler(feature_range=(0,1))),
                  ('var', VarianceThreshold()),
                  ('pca', PCA(n_components=100)),
-                 ('clf', SVR())])
+                 ('clf', SVR(kernel='linear', C=1))])
 
 param_range_svm = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0, 10, 100]
 param_range_lasso = np.linspace(0, 10, 11)
@@ -111,11 +111,11 @@ for i in range(1, 139):
 
 cut.make_cut(Data_test)
 cut_real_test = cut.cut
-#cut.make_cubes(cut.cut, size_cubes=5)
-#desc_real_test = cut.descriptor
+cut.make_cubes(cut.cut, size_cubes=5)
+desc_real_test = cut.descriptor
 
-checker = check.make_checker(cut_real_test)
-desc_real_test = checker.checker
+#checker = check.make_checker(cut_real_test)
+#desc_real_test = checker.checker
 
 #filter.calculate_prewitt(cut_real_test)
 #desc_real_test2 = filter.flatten(filter.transformed)
@@ -124,7 +124,7 @@ desc_real_test = checker.checker
 
 predictions = best_pipe.predict(desc_real_test)
 
-with open("SubmissionIntensitiesCubes.csv", mode='w') as f:
+with open("SubmissionIntensitiesCubicles.csv", mode='w') as f:
     f.write("ID,Prediction\n")
     for idx, pred in enumerate(predictions):
         f.write(str(idx+1)+','+str(pred)+'\n')
