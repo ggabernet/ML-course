@@ -2,3 +2,5 @@
 MRI/data/
 MRI/output/
 *.pyc
+.ipynb_checkpoints
+MRI/nilearn_cache/

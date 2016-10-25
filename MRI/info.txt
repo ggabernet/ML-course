@@ -1,0 +1,5 @@
+(186, 33)
+{'clf__alpha': 10.0}
+Score R^2: 0.75633617118
+MRSE score test data: 150.199750216
+MRSE score train data: 171.036343177
