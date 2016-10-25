@@ -54,7 +54,7 @@ param_range_svm = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0, 10, 100]
 param_range_lasso = np.linspace(0, 10, 11)
 gs = GridSearchCV(estimator=pipe,
                   param_grid=[{'clf__C': param_range_svm,
-                               'pca__n_components': range(1,100,1)}],
+                               'pca__n_components': [250]}],
                   cv=5,
                   n_jobs=1)
 
@@ -66,8 +66,8 @@ print gs.best_params_
 means = gs.cv_results_['mean_test_score']
 stds = gs.cv_results_['std_test_score']
 for mean, std, params in zip(means, stds, gs.cv_results_['params']):
-    if params == gs.best_params_:
-        print("%0.3f (+/-%0.03f) for %r" % (mean, std * 2, params))
+    #if params == gs.best_params_:
+    print("%0.3f (+/-%0.03f) for %r" % (mean, std * 2, params))
 
 best_pipe.fit(desc_train, y_train)
 

@@ -48,11 +48,11 @@ print desc_train.shape
 pipe = Pipeline([('scl', StandardScaler()),
 				 ('var', VarianceThreshold()),
 				 ('pca', PCA(n_components=100)),
-				 ('clf', RandomForestRegressor(n_estimators=500, max_features='sqrt'))])
+				 ('clf', SVR(kernel='linear'))])
 param_range_svm = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0, 10, 100]
 param_range_lasso = np.linspace(0, 10, 11)
 gs = GridSearchCV(estimator=pipe,
-				  param_grid=[{'clf__max_features': ['auto','sqrt','log2'],
+				  param_grid=[{'clf__C': [0.01],
 							   'pca__n_components': [250]}],
 				  cv=5,
 				  scoring=make_scorer(mean_squared_error),
