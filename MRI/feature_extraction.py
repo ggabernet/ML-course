@@ -1,5 +1,4 @@
 from skimage import measure
-import matplotlib.pyplot as plt
 import numpy as np
 from skimage.filters import sobel, scharr, prewitt
 from sklearn.base import BaseEstimator, TransformerMixin
@@ -65,7 +64,7 @@ class CenterCutCubes(BaseEstimator, TransformerMixin):
             cut.append(n[self.x1:self.x2, self.y1:self.y2, self.z1:self.z2])
         self.cut = cut
         descriptor = []
-        for n in X_train:
+        for n in cut:
             int_cubes = []
             for i in range(0, n.shape[0], self.size_cubes):
                 for j in range(0, n.shape[1], self.size_cubes):
@@ -217,7 +216,7 @@ class Intensities:
 
     def calculate_intensity_layers(self, X, layers_x_dim):
         self.layers_x_dim = layers_x_dim
-        descriptor= []
+        descriptor = []
         for n in X:
             xlay = np.linspace(1, n.shape[0] - 1, self.layers_x_dim, dtype=int)
             ylay = np.linspace(1, n.shape[1] - 1, self.layers_x_dim, dtype=int)
@@ -408,19 +407,5 @@ class Contours:
                 area = 0
             i += 1
         return area
-
-
-    def _plot_layer_2D_contours(self, X):
-        for n in range(len(X)):
-            fig, ax = plt.subplots()
-            ax.imshow(X[n], interpolation='nearest', cmap=plt.cm.gray)
-
-            for contour in self.contours[n]:
-                ax.plot(contour[:, 1], contour[:, 0], linewidth=2)
-
-            ax.axis('image')
-            ax.set_xticks([])
-            ax.set_yticks([])
-            plt.show()
 
 
