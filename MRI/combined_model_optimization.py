@@ -4,7 +4,7 @@ import nibabel as nib
 from feature_extraction import CenterCutCubes, CovSel, CenterCut
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.pipeline import Pipeline
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.metrics import *
@@ -20,6 +20,7 @@ for i in range(1, 279):
     imagefile = nib.load("data/set_train/train_"+str(i)+".nii")
     image = imagefile.get_data()
     I = image[:, :, :, 0]
+    imagefile.uncache()
     Data.append(np.asarray(I))
 
 print I.shape
@@ -36,31 +37,29 @@ y_train = Targets
 # filter.calculate_prewitt(cut_test)
 # desc_test = filter.flatten(filter.transformed)
 
-
-
 pipe = Pipeline([('cut', CenterCutCubes(size_cubes=5)),
-                 ('cov', CovSel(cut_off=0.8)),
                 ('scl', StandardScaler()),
                 ('var', VarianceThreshold()),
                 ('pca', PCA()),
                 ('clf', SVR(kernel='linear'))])
-param_range_svm = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0, 10, 100]
-param_range_lasso = np.linspace(0, 10, 11)
-param_range_cut_left = range(20, 70, 10)
-param_range_cut_right = range(80, 160, 10)
-param_range_size_cube = range(1, 10)
+param_range_svm = [0.01, 0.1, 1]
+param_range_cut_left = range(50, 110, 5)
+param_range_cut_right = [80, 100, 120, 150]
+param_range_size_cube = [1,3,5,10]
 gs = GridSearchCV(estimator=pipe,
-                  param_grid=[{'cut__size_cubes': param_range_size_cube,
-                               'cut__y1': param_range_cut_left,
-                               'cut__x1': param_range_cut_left,
-                               'cut__z1': param_range_cut_left,
-                               'cut__x2': param_range_cut_right,
-                               'cut__y2': param_range_cut_right,
-                               'cut__z2': param_range_cut_right,
-                               'clf__C': param_range_svm,
+                  param_grid=[{'cut__size_cubes': [3],
+                               'cut__y1': [80],
+                               'cut__x1': [50],
+                               'cut__z1': [50],
+                               'cut__x2': [120],
+                               'cut__y2': [150],
+                               'cut__z2': [100],
+                               'clf__C': [0.1],
                                'pca__n_components': [250]}],
+                  error_score=999,
                   cv=5,
                   n_jobs=-1,
+                  verbose=1000,
                   scoring=make_scorer(mean_squared_error))
 
 gs.fit(X_train, y_train)
@@ -71,7 +70,6 @@ print gs.best_params_
 means = gs.cv_results_['mean_test_score']
 stds = gs.cv_results_['std_test_score']
 for mean, std, params in zip(means, stds, gs.cv_results_['params']):
-    #if params == gs.best_params_:
     print("%0.3f (+/-%0.03f) for %r" % (mean, std * 2, params))
 
 best_pipe.fit(X_train, y_train)
@@ -102,4 +100,5 @@ predictions = best_pipe.predict(X_test)
 with open("SubmissionOptimizedCombinedModel.csv", mode='w') as f:
     f.write("ID,Prediction\n")
     for idx, pred in enumerate(predictions):
+        pred = round(pred,0)
         f.write(str(idx+1)+','+str(pred)+'\n')
