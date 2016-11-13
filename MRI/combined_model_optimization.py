@@ -48,12 +48,12 @@ param_range_cut_right = [80, 100, 120, 150]
 param_range_size_cube = [1,3,5,10]
 gs = GridSearchCV(estimator=pipe,
                   param_grid=[{'cut__size_cubes': [3],
-                               'cut__y1': [85],
-                               'cut__x1': [60],
-                               'cut__z1': param_range_cut_left,
+                               'cut__y1': [80],
+                               'cut__x1': [50],
+                               'cut__z1': [50],
                                'cut__x2': [120],
                                'cut__y2': [150],
-                               'cut__z2': [120],
+                               'cut__z2': [100],
                                'clf__C': [0.1],
                                'pca__n_components': [250]}],
                   error_score=999,
@@ -97,7 +97,8 @@ X_test = Data_test
 
 predictions = best_pipe.predict(X_test)
 
-# with open("SubmissionOptimizedCombinedModel_2510.csv", mode='w') as f:
-#     f.write("ID,Prediction\n")
-#     for idx, pred in enumerate(predictions):
-#         f.write(str(idx+1)+','+str(pred)+'\n')
+with open("SubmissionOptimizedCombinedModel.csv", mode='w') as f:
+    f.write("ID,Prediction\n")
+    for idx, pred in enumerate(predictions):
+        pred = round(pred,0)
+        f.write(str(idx+1)+','+str(pred)+'\n')
