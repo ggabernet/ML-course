@@ -1,17 +1,16 @@
 from skimage import measure
 import numpy as np
 import nibabel as nib
-from feature_extraction import CenterCutCubes, CovSel, CenterCut
+from feature_extraction import CenterCutCubes
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.metrics import *
-from sklearn.linear_model import Lasso
 from sklearn.model_selection import GridSearchCV
-from sklearn.svm import SVR
-from sklearn.decomposition import PCA, RandomizedPCA
+from sklearn.svm import SVC
+from sklearn.decomposition import PCA
 
 Targets = np.genfromtxt("data/targets.csv")
 
@@ -25,42 +24,32 @@ for i in range(1, 279):
 
 print I.shape
 
-X_train = Data
-y_train = Targets
 
-# X_train, X_test, y_train, y_test = \
-#     train_test_split(Data, Targets, test_size=0.33, random_state=42)
+X_train, X_test, y_train, y_test = \
+     train_test_split(Data, Targets, test_size=0.33, random_state=42)
 
-# cut.make_cut(X_test)
-# cut_test = cut.cut
-#
-# filter.calculate_prewitt(cut_test)
-# desc_test = filter.flatten(filter.transformed)
-
-pipe = Pipeline([('cut', CenterCutCubes(size_cubes=5)),
+pipe = Pipeline([('cut', CenterCutCubes(size_cubes=3)),
                 ('scl', StandardScaler()),
-                ('var', VarianceThreshold(100)),
+                ('var', VarianceThreshold()),
                 ('pca', PCA()),
-                ('clf', SVR(kernel='linear'))])
-param_range_svm = [0.01, 0.1, 1]
-param_range_cut_left = range(50, 110, 5)
-param_range_cut_right = [80, 100, 120, 150]
-param_range_size_cube = [1,3,5,10]
+                ('clf', SVC(kernel='linear'))])
+
+
 gs = GridSearchCV(estimator=pipe,
-                  param_grid=[{'cut__size_cubes': [5],
-                               'cut__y1': [80],
+                  param_grid=[{'cut__size_cubes': [3],
+                               'cut__y1': [50],
                                'cut__x1': [50],
                                'cut__z1': [50],
-                               'cut__x2': [120],
-                               'cut__y2': [150],
-                               'cut__z2': [100],
+                               'cut__x2': [170],
+                               'cut__y2': [200],
+                               'cut__z2': [170],
                                'clf__C': [0.1],
-                               'pca__n_components': [250]}],
+                               'pca__n_components': [10]}],
                   error_score=999,
                   cv=5,
                   n_jobs=-1,
-                  verbose=1000,
-                  scoring=make_scorer(mean_squared_error))
+                  verbose=10,
+                  scoring=make_scorer(log_loss))
 
 gs.fit(X_train, y_train)
 
@@ -74,16 +63,18 @@ for mean, std, params in zip(means, stds, gs.cv_results_['params']):
 
 best_pipe.fit(X_train, y_train)
 
-# score = best_pipe.score(desc_test, y_test)
-# print("Score R^2: "+str(score))
-#
-# y_test_predicted = best_pipe.predict(desc_test)
-# MRSE_test = mean_squared_error(y_test, y_test_predicted)
-# print("MRSE score test data: " + str(MRSE_test))
-#
-# y_train_predicted = best_pipe.predict(desc_train)
-# MRSE_train = mean_squared_error(y_train, y_train_predicted)
-# print("MRSE score train data: " + str(MRSE_train))
+desc_test = best_pipe.transform(X_test)
+score = best_pipe.score(desc_test, y_test)
+print("Score log_loss: "+str(score))
+
+y_test_predicted = best_pipe.predict(desc_test)
+score_test = mean_squared_error(y_test, y_test_predicted)
+print("log_loss test data: " + str(score_test))
+
+desc_train = best_pipe.steps[]transform(X_train)
+y_train_predicted = best_pipe.predict(desc_train)
+score_train = log_loss(y_train, y_train_predicted)
+print("log_loss train data: " + str(score_train))
 
 
 Data_test = []
@@ -100,5 +91,5 @@ predictions = best_pipe.predict(X_test)
 with open("Scores.csv", mode='w') as f:
     f.write("ID,Prediction\n")
     for idx, pred in enumerate(predictions):
-        pred = round(pred,0)
+        pred = round(pred, 0)
         f.write(str(idx+1)+','+str(pred)+'\n')
