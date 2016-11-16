@@ -39,9 +39,9 @@ X_train,y_train=Data,Targets
 cut = CenterCut()
 cut.make_cut(X_train)
 cut_train = cut.cut
-cut.make_cubes(cut.cut, size_cubes=5)
+cut.make_cubes(cut.cut, size_cubes=3)
 desc_train = cut.descriptor
-desc_train = desc_train.round(0)
+desc_train = desc_train.round(-1)
 #check = CheckrPixl()
 #checker = check.make_checker(cut_train)
 #desc_train = checker.checker
@@ -70,16 +70,16 @@ print desc_train.shape
 
 
 #('feature_selection', SelectFromModel(LassoCV(),threshold=0.001)),
-pipe = Pipeline([('scl', MinMaxScaler(feature_range=(0,1))),
+pipe = Pipeline([('scl', StandardScaler()),
                  ('var', VarianceThreshold()),
                  ('pca', PCA(n_components=100)),
-                 ('clf', SVR(kernel='linear', C=1))])
+                 ('clf', SVR(kernel='linear', C=0.01))])
 
 param_range_svm = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0, 10, 100]
 param_range_lasso = np.linspace(0, 10, 11)
 gs = GridSearchCV(estimator=pipe,
-                  param_grid=[{'clf__C': [1], 'pca__n_components': [250]}],
-                  cv=10,
+                  param_grid=[{'clf__C': [0.01], 'pca__n_components': [250]}],
+                  cv=5,
                   n_jobs=1)
 
 gs.fit(desc_train, y_train)
@@ -111,7 +111,7 @@ for i in range(1, 139):
 
 cut.make_cut(Data_test)
 cut_real_test = cut.cut
-cut.make_cubes(cut.cut, size_cubes=5)
+cut.make_cubes(cut.cut, size_cubes=3)
 desc_real_test = cut.descriptor
 
 #checker = check.make_checker(cut_real_test)
