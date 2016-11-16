@@ -39,12 +39,12 @@ X_train,y_train=Data,Targets
 cut = CenterCut()
 cut.make_cut(X_train)
 cut_train = cut.cut
-cut.make_cubes(cut.cut, size_cubes=3)
-desc_train = cut.descriptor
-desc_train = desc_train.round(-1)
-#check = CheckrPixl()
-#checker = check.make_checker(cut_train)
-#desc_train = checker.checker
+#cut.make_cubes(cut.cut, size_cubes=5)
+#desc_train = cut.descriptor
+#desc_train = desc_train.round(0)
+check = CheckrPixl()
+checker = check.make_checker(cut_train)
+desc_train = checker.checker
 
 #filter = Filtering()
 #filter.calculate_prewitt(cut_train)
@@ -78,15 +78,22 @@ pipe = Pipeline([('scl', StandardScaler()),
 param_range_svm = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0, 10, 100]
 param_range_lasso = np.linspace(0, 10, 11)
 gs = GridSearchCV(estimator=pipe,
-                  param_grid=[{'clf__C': [0.01], 'pca__n_components': [250]}],
-                  cv=5,
-                  n_jobs=1)
+                  param_grid=[{'clf__C': [1], 'pca__n_components': [250]}],
+                  cv=10,
+                  n_jobs=-1,
+                  scoring=make_scorer(mean_squared_error))
 
 gs.fit(desc_train, y_train)
 
 best_pipe = gs.best_estimator_
 print gs.best_params_
 best_pipe.fit(desc_train, y_train)
+
+means = gs.cv_results_['mean_test_score']
+stds = gs.cv_results_['std_test_score']
+for mean, std, params in zip(means, stds, gs.cv_results_['params']):
+    #if params == gs.best_params_:
+    print("%0.3f (+/-%0.03f) for %r" % (mean, std * 2, params))
 
 
 #score = best_pipe.score(desc_test, y_test)
@@ -111,11 +118,11 @@ for i in range(1, 139):
 
 cut.make_cut(Data_test)
 cut_real_test = cut.cut
-cut.make_cubes(cut.cut, size_cubes=3)
+cut.make_cubes(cut.cut, size_cubes=5)
 desc_real_test = cut.descriptor
 
-#checker = check.make_checker(cut_real_test)
-#desc_real_test = checker.checker
+checker = check.make_checker(cut_real_test)
+desc_real_test = checker.checker
 
 #filter.calculate_prewitt(cut_real_test)
 #desc_real_test2 = filter.flatten(filter.transformed)
