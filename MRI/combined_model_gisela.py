@@ -96,7 +96,7 @@ desc_real_test = cut.descriptor
 
 predictions = best_pipe.predict(desc_real_test)
 
-with open("SubmissionOptimizedCombinedModel.csv", mode='w') as f:
+with open("Scores.csv", mode='w') as f:
     f.write("ID,Prediction\n")
     for idx, pred in enumerate(predictions):
         f.write(str(idx+1)+','+str(pred)+'\n')
