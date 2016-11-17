@@ -31,20 +31,18 @@ X_train, X_test, y_train, y_test = \
 pipe = Pipeline([('cut', CenterCutCubes(size_cubes=3)),
                 ('scl', StandardScaler()),
                 ('var', VarianceThreshold()),
-                ('pca', PCA()),
                 ('clf', SVC(kernel='linear'))])
 
 
 gs = GridSearchCV(estimator=pipe,
-                  param_grid=[{'cut__size_cubes': [3],
+                  param_grid=[{'cut__size_cubes': [10],
                                'cut__y1': [50],
                                'cut__x1': [50],
                                'cut__z1': [50],
                                'cut__x2': [170],
                                'cut__y2': [200],
                                'cut__z2': [170],
-                               'clf__C': [0.1],
-                               'pca__n_components': [10]}],
+                               'clf__C': [0.1]}],
                   error_score=999,
                   cv=5,
                   n_jobs=-1,
@@ -63,16 +61,13 @@ for mean, std, params in zip(means, stds, gs.cv_results_['params']):
 
 best_pipe.fit(X_train, y_train)
 
-desc_test = best_pipe.transform(X_test)
-score = best_pipe.score(desc_test, y_test)
-print("Score log_loss: "+str(score))
 
-y_test_predicted = best_pipe.predict(desc_test)
-score_test = mean_squared_error(y_test, y_test_predicted)
+y_test_predicted = best_pipe.predict(X_test)
+score_test = log_loss(y_test, y_test_predicted)
 print("log_loss test data: " + str(score_test))
 
-desc_train = best_pipe.steps[]transform(X_train)
-y_train_predicted = best_pipe.predict(desc_train)
+
+y_train_predicted = best_pipe.predict(X_train)
 score_train = log_loss(y_train, y_train_predicted)
 print("log_loss train data: " + str(score_train))
 
