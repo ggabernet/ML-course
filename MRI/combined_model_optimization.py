@@ -39,7 +39,7 @@ y_train = Targets
 
 pipe = Pipeline([('cut', CenterCutCubes(size_cubes=5)),
                 ('scl', StandardScaler()),
-                ('var', VarianceThreshold()),
+                ('var', VarianceThreshold(100)),
                 ('pca', PCA()),
                 ('clf', SVR(kernel='linear'))])
 param_range_svm = [0.01, 0.1, 1]
@@ -47,7 +47,7 @@ param_range_cut_left = range(50, 110, 5)
 param_range_cut_right = [80, 100, 120, 150]
 param_range_size_cube = [1,3,5,10]
 gs = GridSearchCV(estimator=pipe,
-                  param_grid=[{'cut__size_cubes': [3],
+                  param_grid=[{'cut__size_cubes': [5],
                                'cut__y1': [80],
                                'cut__x1': [50],
                                'cut__z1': [50],
