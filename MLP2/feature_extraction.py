@@ -3,6 +3,8 @@ import numpy as np
 from skimage.filters import sobel, scharr, prewitt
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.decomposition import PCA
+import scipy
+from scipy.stats import pearsonr
 
 
 class CenterCut:
@@ -409,3 +411,17 @@ class Contours:
         return area
 
 
+class pvalselect:
+    def __init__(self, cubicled_Xtrain, targets):
+        self.cubicled_Xtrain = np.array(cubicled_Xtrain)
+        self.index = np.argsort(targets)
+        self.zero_count = targets.tolist().count(0)
+        self.Xtrain_zero = self.cubicled_Xtrain[self.index][0:self.zero_count]
+        self.Xtrain_one = self.cubicled_Xtrain[self.index][self.zero_count:]
+        self.nr_feat = self.cubicled_Xtrain.shape[1]
+
+    def compute_pvals(self):
+        pvals=[]
+        for column in range(0,self.nr_feat):
+            pvals.append(scipy.stats.ttest_ind(self.Xtrain_zero[:,column],self.Xtrain_one[:,column])[1])
+        return pvals
