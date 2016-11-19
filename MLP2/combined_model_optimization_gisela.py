@@ -30,6 +30,7 @@ X_train, X_test, y_train, y_test = \
 
 pipe = Pipeline([('cut', CenterCutCubes(size_cubes=3)),
                 ('var', VarianceThreshold()),
+
                 ('pca', PCA(n_components=10)),
                 ('clf', SVC(kernel='rbf'))])
 
