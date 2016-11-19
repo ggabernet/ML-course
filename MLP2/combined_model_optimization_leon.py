@@ -1,9 +1,10 @@
 from skimage import measure
 import numpy as np
 import nibabel as nib
-from feature_extraction import CenterCutCubes, pvalselect
+from feature_extraction import CenterCutCubes, PvalSelect
 import numpy as np
 from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler, RobustScaler
 from sklearn.pipeline import Pipeline
 from sklearn.feature_selection import VarianceThreshold
@@ -36,10 +37,14 @@ ccc.fit(X_train)
 X_train_ccc = ccc.transform(X_train)
 print X_train_ccc[0].shape
 
-pvals = pvalselect(X_train_ccc,y_train)
-print pvals.compute_pvals()
+pvals = PvalSelect()
+pvals.fit(X_train_ccc, y_train)
+print pvals.feat_pvals
+print pvals.feat_pvals > 0.05
+print np.where(pvals.feat_pvals > 0.05)
+print pvals.feat_t_idx
+print pvals.transform(X_train_ccc, y_train).shape
 
-#
 # pipe = Pipeline([('cut', CenterCutCubes(size_cubes=3)),
 #                 ('var', VarianceThreshold()),
 #                 ('scl', StandardScaler()),
