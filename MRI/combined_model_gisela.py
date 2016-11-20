@@ -20,6 +20,7 @@ for i in range(1, 279):
     imagefile = nib.load("data/set_train/train_"+str(i)+".nii")
     image = imagefile.get_data()
     I = image[:, :, :, 0]
+    imagefile.uncache()
     Data.append(np.asarray(I))
 
 print I.shape
@@ -32,7 +33,7 @@ y_train = Targets
 
 cut = CenterCut()
 cut.make_cut(X_train)
-cut.make_cubes(cut.cut, size_cubes=5)
+cut.make_cubes(cut.cut, size_cubes=3)
 desc_train = cut.descriptor
 
 # cut.make_cut(X_test)
@@ -90,7 +91,7 @@ for i in range(1, 139):
 
 
 cut.make_cut(Data_test)
-cut.make_cubes(cut.cut, size_cubes=5)
+cut.make_cubes(cut.cut, size_cubes=3)
 desc_real_test = cut.descriptor
 
 predictions = best_pipe.predict(desc_real_test)
