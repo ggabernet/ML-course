@@ -73,7 +73,7 @@ print desc_train.shape
 pipe = Pipeline([('scl', StandardScaler()),
                  ('var', VarianceThreshold()),
                  ('pca', PCA(n_components=100)),
-                 ('clf', SVR(kernel='linear', C=1))])
+                 ('clf', SVR(kernel='linear', C=0.01))])
 
 param_range_svm = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0, 10, 100]
 param_range_lasso = np.linspace(0, 10, 11)
@@ -118,8 +118,8 @@ for i in range(1, 139):
 
 cut.make_cut(Data_test)
 cut_real_test = cut.cut
-#cut.make_cubes(cut.cut, size_cubes=5)
-#desc_real_test = cut.descriptor
+cut.make_cubes(cut.cut, size_cubes=5)
+desc_real_test = cut.descriptor
 
 checker = check.make_checker(cut_real_test)
 desc_real_test = checker.checker
