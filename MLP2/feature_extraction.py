@@ -413,32 +413,26 @@ class Contours:
 
 
 class Select(BaseEstimator, TransformerMixin):
-    def __init__(self, X_train, targets, type, threshold):
+    def __init__(self, type, threshold):
         self.type = type
         self.threshold = threshold
-        self.X_trans =np.array([0])
-        self.targets = targets
-        self.X_train = X_train
+        self.index = np.array([])
 
-    def fit(self):
+    def fit(self, X, y):
+        if self.type =="f_value":
+            vals = f_classif(X, y)[0]
+        if self.type =="p_value":
+            vals = f_classif(X, y)[1]
+        if self.type == "mutual_info":
+            vals = mutual_info_classif(X, y)
+        if self.type == "chi2":
+            vals = chi2(X, y)[0]
+        self.index = np.where(vals < self.threshold)[0]
         return self
 
-    def transform(self,X):
-        if self.type =="f_value":
-            vals = f_classif(X, self.targets)[0]
-        if self.type =="p_value":
-            vals = f_classif(X, self.targets)[1]
-        if self.type == "mutual_info":
-            vals = mutual_info_classif(X, self.targets)
-        if self.type == "chi2":
-            vals = chi2(X, self.targets)[0]
-        self.index = np.where(vals < self.threshold)[0]
-        self.X_trans = X[:, self.index]
-        return self.X_trans
+    def transform(self,X,y=None):
+        return X[:, self.index]
 
-    def transform_test(self,X):
-        self.X_trans = X[:, self.index]
-        return self.X_trans
 
 class PvalSelect(BaseEstimator, TransformerMixin):
     def __init__(self, pval_cut=0.05):
