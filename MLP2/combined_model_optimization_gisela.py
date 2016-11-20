@@ -1,7 +1,7 @@
 from skimage import measure
 import numpy as np
 import nibabel as nib
-from feature_extraction import CenterCutCubes
+from feature_extraction import CenterCutCubes, PvalSelect
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -30,21 +30,22 @@ X_train, X_test, y_train, y_test = \
 
 pipe = Pipeline([('cut', CenterCutCubes(size_cubes=3)),
                 ('var', VarianceThreshold()),
-
-                ('pca', PCA(n_components=10)),
-                ('clf', SVC(kernel='rbf'))])
+                ('pval', PvalSelect()),
+                ('pca', PCA()),
+                ('clf', SVC())])
 
 
 gs = GridSearchCV(estimator=pipe,
-                  param_grid=[{'cut__size_cubes': [10],
+                  param_grid=[{'cut__size_cubes': [3],
                                'cut__x1': [75],
                                'cut__y1': [70],
                                'cut__z1': [65],
                                'cut__x2': [85],
                                'cut__y2': [160],
                                'cut__z2': [120],
-                               'clf__C': [0.01],
-                               'pca__n_components': [10]}],
+                               'clf__kernel': ['linear', 'rbf'],
+                               'pca__n_components': [10, 250],
+                               'clf__C': [0.01, 1]}],
                   error_score=999,
                   cv=5,
                   n_jobs=-1,

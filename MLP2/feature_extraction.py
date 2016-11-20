@@ -440,7 +440,7 @@ class PvalSelect(BaseEstimator, TransformerMixin):
         self.feat_t_idx = feat[np.where(self.feat_pvals < self.pval_cut)]
         return self
 
-    def transform(self, X, y):
+    def transform(self, X, y=None):
         X_t = X[:, self.feat_t_idx]
         return X_t
 
