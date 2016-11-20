@@ -86,10 +86,10 @@ y_train = []
 
 for i in train_set_0:
     X_train.append(Data_class_0[i][0])
-    y_train.append(Targets_class_0[i][0])
+    y_train.append(Targets_class_0[i])
 for i in train_set_1:
     X_train.append(Data_class_1[i][0])
-    y_train.append(Targets_class_1[i][0])
+    y_train.append(Targets_class_1[i])
 
 #test set
 
@@ -97,11 +97,12 @@ X_test = []
 y_test = []
 
 for i in test_set_0:
-    X_test.append(Data_class_0[i])
+    X_test.append(Data_class_0[i][0])
     y_test.append(Targets_class_0[i])
 for i in test_set_1:
-    X_test.append(Data_class_1[i])
+    X_test.append(Data_class_1[i][0])
     y_test.append(Targets_class_1[i])
+
 
 ###plot class variation
 Data_class_0 = np.asarray(Data_class_0)
@@ -111,6 +112,7 @@ var_0 = np.mean(Data_class_0, axis=0)
 print var_0.shape
 plt.imshow(var_0)
 plt.show()
+
 
 Data_class_1 = np.asarray(Data_class_1)
 print Data_class_1.shape
