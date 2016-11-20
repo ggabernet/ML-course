@@ -1,7 +1,7 @@
 from skimage import measure
 import numpy as np
 import nibabel as nib
-from feature_extraction import CenterCutCubes, PvalSelect
+from feature_extraction import CenterCutCubes, PvalSelect, Select
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -11,6 +11,8 @@ from sklearn.metrics import *
 from sklearn.model_selection import GridSearchCV
 from sklearn.svm import SVC
 from sklearn.decomposition import PCA
+from sklearn.naive_bayes import GaussianNB
+from sklearn.ensemble import BaggingClassifier
 
 Targets = np.genfromtxt("data/targets.csv")
 
@@ -30,22 +32,19 @@ X_train, X_test, y_train, y_test = \
 
 pipe = Pipeline([('cut', CenterCutCubes(size_cubes=3)),
                 ('var', VarianceThreshold()),
-                ('pval', PvalSelect()),
-                ('pca', PCA()),
-                ('clf', SVC())])
+                ('sel', Select(type='f_value', threshold=0.1)),
+                ('clf', GaussianNB())])
 
 
 gs = GridSearchCV(estimator=pipe,
                   param_grid=[{'cut__size_cubes': [3],
-                               'cut__x1': [75],
-                               'cut__y1': [70],
-                               'cut__z1': [65],
+                               'cut__x1': [10],
+                               'cut__y1': [10],
+                               'cut__z1': [10],
                                'cut__x2': [85],
                                'cut__y2': [160],
                                'cut__z2': [120],
-                               'clf__kernel': ['linear', 'rbf'],
-                               'pca__n_components': [10, 250],
-                               'clf__C': [0.01, 1]}],
+                               'pca__n_components': [10, 250]}],
                   error_score=999,
                   cv=5,
                   n_jobs=-1,
@@ -54,23 +53,27 @@ gs = GridSearchCV(estimator=pipe,
 
 gs.fit(X_train, y_train)
 
-best_pipe = gs.best_estimator_
-print gs.best_params_
-
 means = gs.cv_results_['mean_test_score']
 stds = gs.cv_results_['std_test_score']
 for mean, std, params in zip(means, stds, gs.cv_results_['params']):
     print("%0.3f (+/-%0.03f) for %r" % (mean, std * 2, params))
 
-best_pipe.fit(X_train, y_train)
+#best_pipe = gs.best_estimator_
+#print gs.best_params_
 
+bagging = BaggingClassifier(base_estimator=gs.best_estimator_, n_estimators=10, n_jobs=-1, verbose=10)
 
-y_test_predicted = best_pipe.predict(X_test)
+#best_pipe.fit(X_train, y_train)
+bagging.fit(X_train, y_train)
+
+#y_test_predicted = best_pipe.predict(X_test)
+y_test_predicted = bagging.predict(X_test)
 score_test = log_loss(y_test, y_test_predicted)
 print("log_loss test data: " + str(score_test))
 
 
-y_train_predicted = best_pipe.predict(X_train)
+#y_train_predicted = best_pipe.predict(X_train)
+y_train_predicted = bagging.predict(X_train)
 score_train = log_loss(y_train, y_train_predicted)
 print("log_loss train data: " + str(score_train))
 
