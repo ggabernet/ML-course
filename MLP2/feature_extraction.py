@@ -171,6 +171,7 @@ class Filtering:
             flat.append(n.flatten(order='C'))
         return np.asarray(flat)
 
+# TODO: add gaussian preprocessing
 
 class CovSel(BaseEstimator, TransformerMixin):
     def __init__(self, cut_off=0.5):
@@ -471,4 +472,3 @@ class PvalSelect(BaseEstimator, TransformerMixin):
     def plot_pvals_histogram(self):
         plt.hist(self._compute_pvals(), bins=20, range=(0, 1))
         plt.show()
-
