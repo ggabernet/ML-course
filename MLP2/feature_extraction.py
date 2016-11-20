@@ -5,6 +5,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.decomposition import PCA
 import scipy
 from scipy.stats import pearsonr
+from sklearn.feature_selection import mutual_info_classif, f_classif, chi2
 import matplotlib.pyplot as plt
 
 
@@ -409,6 +410,28 @@ class Contours:
                 area = 0
             i += 1
         return area
+
+
+class Select(BaseEstimator, TransformerMixin):
+    def __init__(self, type, threshold):
+        self.type = type
+        self.threshold = threshold
+        self.index = np.array([])
+
+    def fit(self, X, y):
+        if self.type =="f_value":
+            vals = f_classif(X, y)[0]
+        if self.type =="p_value":
+            vals = f_classif(X, y)[1]
+        if self.type == "mutual_info":
+            vals = mutual_info_classif(X, y)
+        if self.type == "chi2":
+            vals = chi2(X, y)[0]
+        self.index = np.where(vals < self.threshold)[0]
+        return self
+
+    def transform(self,X,y=None):
+        return X[:, self.index]
 
 
 class PvalSelect(BaseEstimator, TransformerMixin):
