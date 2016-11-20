@@ -30,21 +30,22 @@ for i in range(1, 279):
 print I.shape
 
 
-# ccc = CenterCutCubes(2)
-# ccc.fit(Data)
-# Data_ccc = ccc.transform(Data)
+# ccc = CenterCutCubes(size_cubes=3, y1=10, x1=10, z1=10, x2=160, y2=190, z2=160)
+# ccc.fit(Data[:100])
+# Data_ccc = ccc.transform(Data[:100])
 # Data_ccc = np.array(Data_ccc)
 # print Data_ccc.shape
-#
-# v=VarianceThreshold(0.1)
+# #
+# v=VarianceThreshold(1)
 # v.fit(Data_ccc)
 # Data_ccc=v.transform(Data_ccc)
-#
-# s=Select(X_train=Data_ccc,targets=Targets, type="mutual_info",threshold=0.001)
-# s.fit()
-# Data=s.transform(Data_ccc)
-#
-# print Data.shape
+# print Data_ccc.shape
+# #
+# s=Select(type="mutual_info",threshold=0.001)
+# s.fit(Data_ccc[:100],Targets[:100])
+# Data_ccc=s.transform(Data_ccc)
+# #
+# print Data_ccc.shape
 #
 
 
@@ -63,17 +64,17 @@ pipe = Pipeline([('cut', CenterCutCubes(size_cubes=2)),
 
 
 gs = GridSearchCV(estimator=pipe,
-                   param_grid=[{'cut__size_cubes': [2],
+                   param_grid=[{'cut__size_cubes': [3],
                                 'cut__y1': [10],
                                 'cut__x1': [10],
                                 'cut__z1': [10],
-                                'cut__x2': [170],
-                                'cut__y2': [200],
-                                'cut__z2': [170],
+                                'cut__x2': [160],
+                                'cut__y2': [190],
+                                'cut__z2': [160],
                                 #'clf__n_estimators': [10]}],
                                 'pca__n_components': [100],
                                 'sel__type': ["f_value","chi2","mutual_info"],
-                                'clf__kernel': ["linear"],
+                                'clf__kernel': ["linear","poly"],
                                 'clf__degree': [2],
                                 'clf__C': [0.01]}],
                    error_score=999,
