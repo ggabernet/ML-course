@@ -6,6 +6,7 @@ from sklearn.decomposition import PCA
 import scipy
 from scipy.stats import pearsonr
 from sklearn.feature_selection import mutual_info_classif, f_classif, chi2
+import matplotlib.pyplot as plt
 
 
 class CenterCut:
@@ -169,7 +170,6 @@ class Filtering:
             flat.append(n.flatten(order='C'))
         return np.asarray(flat)
 
-# TODO: add gaussian preprocessing
 
 class CovSel(BaseEstimator, TransformerMixin):
     def __init__(self, cut_off=0.5):
@@ -439,3 +439,41 @@ class Select(BaseEstimator, TransformerMixin):
     def transform_test(self,X):
         self.X_trans = X[:, self.index]
         return self.X_trans
+
+class PvalSelect(BaseEstimator, TransformerMixin):
+    def __init__(self, pval_cut=0.05):
+        self.feat_pvals = None
+        self.feat_t_idx = []
+        self.pval_cut = pval_cut
+        self.Xtrain_one = []
+        self.nr_feat = None
+
+    def _compute_pvals(self):
+        pvals=[]
+        for column in range(0, self.nr_feat):
+            pval = scipy.stats.ttest_ind(self.Xtrain_zero[:, column], self.Xtrain_one[:, column])[1]
+            if not np.isnan(pval):
+                pvals.append(pval)
+            else:
+                pvals.append(99999) #NaN values produce errors later, substituting them with 99999
+        return pvals
+
+    def fit(self, X, y):
+        index = np.argsort(y)
+        zero_count = y.tolist().count(0)
+        self.Xtrain_zero = X[index][0:zero_count]
+        self.Xtrain_one = X[index][zero_count:]
+        self.nr_feat = X.shape[1]
+        self.feat_pvals = np.asarray(self._compute_pvals())
+        feat = np.asarray(range(0, self.nr_feat))
+        self.feat_t_idx = feat[np.where(self.feat_pvals < self.pval_cut)]
+        return self
+
+    def transform(self, X, y):
+        X_t = X[:, self.feat_t_idx]
+        return X_t
+
+    def plot_pvals_histogram(self):
+        plt.hist(self._compute_pvals(), bins=20, range=(0, 1))
+        plt.show()
+

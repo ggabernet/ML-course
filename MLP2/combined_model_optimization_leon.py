@@ -4,6 +4,7 @@ import nibabel as nib
 from feature_extraction import CenterCutCubes, Select
 import numpy as np
 from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler, RobustScaler
 from sklearn.pipeline import Pipeline
 from sklearn.feature_selection import VarianceThreshold
@@ -49,7 +50,6 @@ print Data.shape
 
 X_train, X_test, y_train, y_test = \
      train_test_split(Data, Targets, test_size=0.33, random_state=42)
-
 
 #mut_inf = mutual_info_classif(np.array(X_train_ccc), y_train, discrete_features='auto', n_neighbors=3, copy=True, random_state=None)
 
@@ -126,3 +126,4 @@ with open("Scores.csv", mode='w') as f:
     for idx, pred in enumerate(predictions):
         pred = round(pred, 0)
         f.write(str(idx+1)+','+str(pred)+'\n')
+
