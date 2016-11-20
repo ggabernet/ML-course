@@ -5,6 +5,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.decomposition import PCA
 import scipy
 from scipy.stats import pearsonr
+from sklearn.feature_selection import mutual_info_classif, f_classif, chi2
 
 
 class CenterCut:
@@ -411,17 +412,30 @@ class Contours:
         return area
 
 
-class pvalselect:
-    def __init__(self, cubicled_Xtrain, targets):
-        self.cubicled_Xtrain = np.array(cubicled_Xtrain)
-        self.index = np.argsort(targets)
-        self.zero_count = targets.tolist().count(0)
-        self.Xtrain_zero = self.cubicled_Xtrain[self.index][0:self.zero_count]
-        self.Xtrain_one = self.cubicled_Xtrain[self.index][self.zero_count:]
-        self.nr_feat = self.cubicled_Xtrain.shape[1]
+class Select(BaseEstimator, TransformerMixin):
+    def __init__(self, X_train, targets, type, threshold):
+        self.type = type
+        self.threshold = threshold
+        self.X_trans =np.array([0])
+        self.targets = targets
+        self.X_train = X_train
 
-    def compute_pvals(self):
-        pvals=[]
-        for column in range(0,self.nr_feat):
-            pvals.append(scipy.stats.ttest_ind(self.Xtrain_zero[:,column],self.Xtrain_one[:,column])[1])
-        return pvals
+    def fit(self):
+        return self
+
+    def transform(self,X):
+        if self.type =="f_value":
+            vals = f_classif(X, self.targets)[0]
+        if self.type =="p_value":
+            vals = f_classif(X, self.targets)[1]
+        if self.type == "mutual_info":
+            vals = mutual_info_classif(X, self.targets)
+        if self.type == "chi2":
+            vals = chi2(X, self.targets)[0]
+        self.index = np.where(vals < self.threshold)[0]
+        self.X_trans = X[:, self.index]
+        return self.X_trans
+
+    def transform_test(self,X):
+        self.X_trans = X[:, self.index]
+        return self.X_trans
