@@ -33,7 +33,7 @@ Data = []
 for i in range(1, 279):
     imagefile = nib.load("data/set_train/train_"+str(i)+".nii")
     image = imagefile.get_data()
-    I = image[:, :, :, 0]
+    I = image[:, :, 80, 0]
     #I=I[x_low:x_up, y_low:y_up]
     I = np.asarray(I, dtype=float)
     #I = gaussian(I, sigma=0.5)
@@ -93,10 +93,10 @@ y_train = []
 #train set
 
 for i in train_set_0:
-    X_train.append(Data_class_0[i][0])
+    X_train.append(Data_class_0[i])
     y_train.append(Targets_class_0[i])
 for i in train_set_1:
-    X_train.append(Data_class_1[i][0])
+    X_train.append(Data_class_1[i])
     y_train.append(Targets_class_1[i])
 
 #test set
@@ -105,15 +105,23 @@ X_test = []
 y_test = []
 
 for i in test_set_0:
-    X_test.append(Data_class_0[i][0])
+    X_test.append(Data_class_0[i])
     y_test.append(Targets_class_0[i])
 for i in test_set_1:
-    X_test.append(Data_class_1[i][0])
+    X_test.append(Data_class_1[i])
     y_test.append(Targets_class_1[i])
+
+X_train = np.asarray(X_train)
+X_test = np.asarray(X_test)
+y_train = np.asarray(y_train)
+y_test = np.asarray(y_test)
 
 ##############################
 #         Fit model          #
 ##############################
+
+# X_train, X_test, y_train, y_test = train_test_split(Data, Targets, test_size=0.33,random_state=42)
+
 
 best_pipe = Pipeline([('scl', StandardScaler()),
                   ('var', VarianceThreshold()),
