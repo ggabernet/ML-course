@@ -30,22 +30,23 @@ for i in range(1, 279):
 print I.shape
 
 
-ccc = CenterCutCubes(2)
-ccc.fit(Data)
-Data_ccc = ccc.transform(Data)
-Data_ccc = np.array(Data_ccc)
-print Data_ccc.shape
-
-v=VarianceThreshold(0.1)
-v.fit(Data_ccc)
-Data_ccc=v.transform(Data_ccc)
-
-s=Select(X_train=Data_ccc,targets=Targets, type="mutual_info",threshold=0.001)
-s.fit()
-Data=s.transform(Data_ccc)
-
-print Data.shape
-
+# ccc = CenterCutCubes(size_cubes=3, y1=10, x1=10, z1=10, x2=160, y2=190, z2=160)
+# ccc.fit(Data[:100])
+# Data_ccc = ccc.transform(Data[:100])
+# Data_ccc = np.array(Data_ccc)
+# print Data_ccc.shape
+# #
+# v=VarianceThreshold(1)
+# v.fit(Data_ccc)
+# Data_ccc=v.transform(Data_ccc)
+# print Data_ccc.shape
+# #
+# s=Select(type="mutual_info",threshold=0.001)
+# s.fit(Data_ccc[:100],Targets[:100])
+# Data_ccc=s.transform(Data_ccc)
+# #
+# print Data_ccc.shape
+#
 
 
 X_train, X_test, y_train, y_test = \
@@ -54,29 +55,30 @@ X_train, X_test, y_train, y_test = \
 #mut_inf = mutual_info_classif(np.array(X_train_ccc), y_train, discrete_features='auto', n_neighbors=3, copy=True, random_state=None)
 
 
-pipe = Pipeline([#('cut', CenterCutCubes(size_cubes=2)),
-                 #('var', VarianceThreshold(0.1)),
-                 #('sel', Select(targets=y_train, type="p_value",threshold=0.01)),
+pipe = Pipeline([('cut', CenterCutCubes(size_cubes=2)),
+                 ('var', VarianceThreshold(1)),
+                 ('sel', Select(type="f_value",threshold=0.001)),
                  ('scl', StandardScaler()),
                  ('pca', PCA( n_components=100)),
                  ('clf', SVC(kernel="linear",degree=2))])
 
 
 gs = GridSearchCV(estimator=pipe,
-                   param_grid=[{#'cut__size_cubes': [5],
-                                #'cut__y1': [50],
-                                #'cut__x1': [50],
-                                #'cut__z1': [50],
-                                #'cut__x2': [120],
-                                #'cut__y2': [150],
-                                #'cut__z2': [100],
+                   param_grid=[{'cut__size_cubes': [3],
+                                'cut__y1': [10],
+                                'cut__x1': [10],
+                                'cut__z1': [10],
+                                'cut__x2': [160],
+                                'cut__y2': [190],
+                                'cut__z2': [160],
                                 #'clf__n_estimators': [10]}],
-                                'pca__n_components': [10,100,250],
-                                 'clf__kernel': ["linear","rbf","poly"],
-                                 'clf__degree': [2],
-                                 'clf__C': [1,0.1,0.01]}],
+                                'pca__n_components': [100],
+                                'sel__type': ["f_value","chi2","mutual_info"],
+                                'clf__kernel': ["linear","poly"],
+                                'clf__degree': [2],
+                                'clf__C': [0.01]}],
                    error_score=999,
-                   cv=2,
+                   cv=5,
                    n_jobs=1,
                    verbose=10,
                    scoring=make_scorer(log_loss))
@@ -111,12 +113,12 @@ for i in range(1, 139):
     I = image[:, :, :, 0]
     Data_test.append(np.asarray(I))
 
-Data_ccc = ccc.transform(Data_test)
-Data_ccc = np.array(Data_ccc)
-print Data_ccc.shape
-
-Data_ccc=v.transform(Data_ccc)
-Data_test=s.transform_test(Data_ccc)
+# Data_ccc = ccc.transform(Data_test)
+# Data_ccc = np.array(Data_ccc)
+# print Data_ccc.shape
+#
+# Data_ccc=v.transform(Data_ccc)
+# Data_test=s.transform_test(Data_ccc)
 
 X_test = Data_test
 predictions = best_pipe.predict(X_test)
