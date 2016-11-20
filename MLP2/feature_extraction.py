@@ -5,6 +5,8 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.decomposition import PCA
 import scipy
 from scipy.stats import pearsonr
+from sklearn.feature_selection import mutual_info_classif, f_classif, chi2
+import matplotlib.pyplot as plt
 
 
 class CenterCut:
@@ -468,4 +470,4 @@ class PvalSelect(BaseEstimator, TransformerMixin):
 
     def plot_pvals_histogram(self):
         plt.hist(self._compute_pvals(), bins=20, range=(0, 1))
-plt.show()
+        plt.show()
