@@ -19,12 +19,12 @@ class CenterCut:
             cut.append(n[x1:x2,y1:y2,z1:z2])
         self.cut = cut
         return self
-    def make_cubes(self, X, size_cubes):
+    def make_cubes(self, X, size_cubes, plane_jump):
         descriptor = []
         for n in X:
             int_cubes = []
             for i in range(0, n.shape[0], size_cubes):
-                for j in range(0, n.shape[1], size_cubes):
+                for j in range(0, n.shape[1], size_cubes*plane_jump):
                     for k in range(0, n.shape[2], size_cubes):
                         cube = n[i:i + size_cubes, j:j + size_cubes, k:k + size_cubes]
                         int_cubes.append(self._get_array_intensity_max(cube))
@@ -47,7 +47,7 @@ class CenterCut:
 
 
 class CenterCutCubes(BaseEstimator, TransformerMixin):
-    def __init__(self, size_cubes, x1=50, x2=120, y1=50, y2=150, z1=50, z2=100):
+    def __init__(self, size_cubes, plane_jump, x1=50, x2=120, y1=50, y2=150, z1=50, z2=100):
         self.cut = []
         self.descriptor = []
         self.x1 = x1
@@ -57,6 +57,7 @@ class CenterCutCubes(BaseEstimator, TransformerMixin):
         self.z1 = z1
         self.z2 = z2
         self.size_cubes = size_cubes
+        self.plane_jump = plane_jump
 
     def fit(self, X_train, y=None):
 
@@ -70,7 +71,7 @@ class CenterCutCubes(BaseEstimator, TransformerMixin):
         descriptor = []
         for n in cut:
             int_cubes = []
-            for i in range(0, n.shape[0], self.size_cubes):
+            for i in range(0, n.shape[0], self.size_cubes*self.plane_jump):
                 for j in range(0, n.shape[1], self.size_cubes):
                     for k in range(0, n.shape[2], self.size_cubes):
                         cube = n[i:i + self.size_cubes, j:j + self.size_cubes, k:k + self.size_cubes]
