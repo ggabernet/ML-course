@@ -111,26 +111,6 @@ for i in test_set_1:
     X_test.append(Data_class_1[i][0])
     y_test.append(Targets_class_1[i])
 
-
-# ###plot class variation
-# Data_class_0 = np.asarray(Data_class_0)
-# print Data_class_0.shape
-#
-# var_0 = np.mean(Data_class_0, axis=0)
-# print var_0.shape
-# plt.imshow(var_0)
-# plt.show()
-#
-#
-# Data_class_1 = np.asarray(Data_class_1)
-# print Data_class_1.shape
-#
-# var_1 = np.mean(Data_class_1, axis=0)
-# print var_1.shape
-# plt.imshow(var_1)
-# plt.show()
-
-
 ##############################
 #         Fit model          #
 ##############################
