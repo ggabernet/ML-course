@@ -71,8 +71,8 @@ class CenterCutCubes(BaseEstimator, TransformerMixin):
         descriptor = []
         for n in cut:
             int_cubes = []
-            for i in range(0, n.shape[0], self.size_cubes):
-                for j in range(0, n.shape[1], self.size_cubes*self.plane_jump):
+            for i in range(0, n.shape[0], self.size_cubes*self.plane_jump):
+                for j in range(0, n.shape[1], self.size_cubes):
                     for k in range(0, n.shape[2], self.size_cubes):
                         cube = n[i:i + self.size_cubes, j:j + self.size_cubes, k:k + self.size_cubes]
                         int_cubes.append(self._get_array_intensity_max(cube))
