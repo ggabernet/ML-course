@@ -30,22 +30,22 @@ for i in range(1, 279):
 print I.shape
 
 
-# ccc = CenterCutCubes(size_cubes=3, y1=10, x1=10, z1=10, x2=160, y2=190, z2=160)
-# ccc.fit(Data[:100])
-# Data_ccc = ccc.transform(Data[:100])
-# Data_ccc = np.array(Data_ccc)
-# print Data_ccc.shape
-# #
-# v=VarianceThreshold(1)
-# v.fit(Data_ccc)
-# Data_ccc=v.transform(Data_ccc)
-# print Data_ccc.shape
-# #
-# s=Select(type="mutual_info",threshold=0.001)
-# s.fit(Data_ccc[:100],Targets[:100])
-# Data_ccc=s.transform(Data_ccc)
-# #
-# print Data_ccc.shape
+ccc = CenterCutCubes(size_cubes=3, plane_jump=3, y1=20, x1=20, z1=20, x2=150, y2=180, z2=150)
+ccc.fit(Data[:100])
+Data_ccc = ccc.transform(Data[:100])
+Data_ccc = np.array(Data_ccc)
+print Data_ccc.shape
+#
+v=VarianceThreshold(1)
+v.fit(Data_ccc)
+Data_ccc=v.transform(Data_ccc)
+print Data_ccc.shape
+#
+s=Select(type="mutual_info",threshold=0.00001)
+s.fit(Data_ccc[:100],Targets[:100])
+Data_ccc=s.transform(Data_ccc)
+#
+print Data_ccc.shape
 #
 
 
