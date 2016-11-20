@@ -30,22 +30,22 @@ for i in range(1, 279):
 print I.shape
 
 
-# ccc = CenterCutCubes(size_cubes=3, y1=10, x1=10, z1=10, x2=160, y2=190, z2=160)
-# ccc.fit(Data[:100])
-# Data_ccc = ccc.transform(Data[:100])
-# Data_ccc = np.array(Data_ccc)
-# print Data_ccc.shape
-# #
-# v=VarianceThreshold(1)
-# v.fit(Data_ccc)
-# Data_ccc=v.transform(Data_ccc)
-# print Data_ccc.shape
-# #
-# s=Select(type="mutual_info",threshold=0.001)
-# s.fit(Data_ccc[:100],Targets[:100])
-# Data_ccc=s.transform(Data_ccc)
-# #
-# print Data_ccc.shape
+ccc = CenterCutCubes(size_cubes=2, plane_jump=3, y1=30, x1=30, z1=30, x2=150, y2=170, z2=140)
+ccc.fit(Data[:100])
+Data_ccc = ccc.transform(Data[:100])
+Data_ccc = np.array(Data_ccc)
+print Data_ccc.shape
+#
+v=VarianceThreshold(1)
+v.fit(Data_ccc)
+Data_ccc=v.transform(Data_ccc)
+print Data_ccc.shape
+#
+s=Select(type="f_value",threshold=0.1)
+s.fit(Data_ccc[:100],Targets[:100])
+Data_ccc=s.transform(Data_ccc)
+#
+print Data_ccc.shape
 #
 
 
@@ -55,28 +55,28 @@ X_train, X_test, y_train, y_test = \
 #mut_inf = mutual_info_classif(np.array(X_train_ccc), y_train, discrete_features='auto', n_neighbors=3, copy=True, random_state=None)
 
 
-pipe = Pipeline([('cut', CenterCutCubes(size_cubes=2)),
+pipe = Pipeline([('cut', CenterCutCubes(size_cubes=2, plane_jump=3)),
                  ('var', VarianceThreshold(1)),
-                 ('sel', Select(type="f_value",threshold=0.001)),
+                 ('sel', Select(type="f_value",threshold=0.1)),
                  ('scl', StandardScaler()),
                  ('pca', PCA( n_components=100)),
                  ('clf', SVC(kernel="linear",degree=2))])
 
 
 gs = GridSearchCV(estimator=pipe,
-                   param_grid=[{'cut__size_cubes': [3],
-                                'cut__y1': [10],
-                                'cut__x1': [10],
-                                'cut__z1': [10],
-                                'cut__x2': [160],
-                                'cut__y2': [190],
-                                'cut__z2': [160],
+                   param_grid=[{'cut__size_cubes': [2],
+                                'cut__y1': [30],
+                                'cut__x1': [30],
+                                'cut__z1': [30],
+                                'cut__x2': [150],
+                                'cut__y2': [170],
+                                'cut__z2': [140],
                                 #'clf__n_estimators': [10]}],
                                 'pca__n_components': [100],
-                                'sel__type': ["f_value","chi2","mutual_info"],
-                                'clf__kernel': ["linear","poly"],
+                                'sel__type': ["f_value"],
+                                'clf__kernel': ["linear","poly","rbf"],
                                 'clf__degree': [2],
-                                'clf__C': [0.01]}],
+                                'clf__C': [0.01,0.1,1]}],
                    error_score=999,
                    cv=5,
                    n_jobs=1,
