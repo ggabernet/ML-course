@@ -34,29 +34,10 @@ Data = X_train
 X_train, X_test, y_train, y_test = \
 		train_test_split(Data, Targets, test_size=0.33, random_state=42)
 
-#regr = linear_model.Lasso(alpha=0.1)
-
-# gs = GridSearchCV(estimator= regr,
-# 				  param_grid=[{'alpha': np.linspace(0,2,21)}],
-# 				  cv=5)
-#
-# gs.fit(X_train, y_train)
-# regr = gs.best_estimator_
-# print gs.best_params_
-
+# regression machine classifier.
 regr = Pipeline([('scl', StandardScaler()),
 						('pca', PCA(n_components=30)),
- 						('clf', SVR(kernel='linear', C=2))])
-
-gs = GridSearchCV(estimator= regr,
-				  param_grid=[{'pca__n_components': np.linspace(1,30,30,dtype=int),
-							   'clf__C': [0.0001, 0.001, 0.01, 0.1, 1, 2, 10, 100]}],
-				  cv=5)
-
-gs.fit(X_train, y_train)
-
-regr = gs.best_estimator_
-print gs.best_params_
+						('clf', SVR(kernel='linear', C=2))])
 
 # Train the model using the training sets
 regr.fit(X_train, y_train)
@@ -96,23 +77,22 @@ for i in range(1, 139):
 	image = example.get_data()
 	I = image[:, :, 80, 0]
 	I=np.asarray(I, dtype=float)
-	# scaling the data
+	#scale data
+	min_max_scaler = preprocessing.MinMaxScaler()
+	I = min_max_scaler.fit_transform(I)
+	#Image processing
+	I = scharr(I)
 	Iflat = I.flatten(order='C')
 	true_test.append(Iflat)
 
-# min_max_scaler = preprocessing.MinMaxScaler()
-# I = min_max_scaler.fit_transform(I)
-# pca = PCA(n_components=20)
-# pca.fit(I)
-# I = pca.components_
 
-# output=open('Submission.csv','w+')
-# output.write("ID, Preidcted_ages"+'\n')
-#
-# for idx, line in enumerate(regr.predict(true_test)):
-# 	  print line
-# 	  output.write(str(idx+1)+','+str(line)+'\n')
-# output.close()
+output=open('Submission.csv','w+')
+output.write("ID,Prediction"+'\n')
+
+for idx, line in enumerate(regr.predict(true_test)):
+	  print line
+	  output.write(str(idx+1)+','+str(line)+'\n')
+output.close()
 
 plt.show()
 
