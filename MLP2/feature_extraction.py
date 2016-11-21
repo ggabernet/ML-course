@@ -47,7 +47,7 @@ class CenterCut:
 
 
 class CenterCutCubes(BaseEstimator, TransformerMixin):
-    def __init__(self, size_cubes, plane_jump, x1=50, x2=120, y1=50, y2=150, z1=50, z2=100):
+    def __init__(self, size_cubes, plane_jump=1, x1=50, x2=120, y1=50, y2=150, z1=50, z2=100):
         self.cut = []
         self.descriptor = []
         self.x1 = x1

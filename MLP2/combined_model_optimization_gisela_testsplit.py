@@ -13,6 +13,7 @@ from sklearn.svm import SVC
 from sklearn.decomposition import PCA
 from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import BaggingClassifier
+import random
 
 Targets = np.genfromtxt("data/targets.csv")
 
@@ -26,16 +27,86 @@ for i in range(1, 279):
 
 print I.shape
 
+
+# -------------------------
+# SPLITTING TRAIN/TEST SETS
+#--------------------------
+
+#the inital input data
 X_train = Data
 y_train = Targets
-# X_train, X_test, y_train, y_test = \
-#      train_test_split(Data, Targets, test_size=0.33, random_state=42)
 
-pipe = Pipeline([('cut', CenterCutCubes(size_cubes=3, plane_jump=1, x1=10, y1=10, z1=10, x2=170, y2=200, z2=170)),
+#setting the empty lists
+Data_class_0 = []
+Data_class_1 = []
+Targets_class_0 = []
+Targets_class_1 = []
+
+#seperates the data sets into class_0 and class_1
+#also saves the index for these data sets in Targets_class_0 and Targets_class_1
+for i in range(0, len(Targets)):
+    if Targets[i] == 0:
+        #stores the data belonging to class 0
+        Data_class_0.append(Data[i])
+        #saves the index for the class 0 data sets
+        Targets_class_0.append(Targets[i])
+    if Targets[i] == 1:
+        # stores the data belonging to class 1
+        Data_class_1.append(Data[i])
+        # saves the index for the class 1 data sets
+        Targets_class_1.append(Targets[i])
+
+#the percent of data sets in the training set
+#percent_train = 0.33
+
+#saves the first (percent_train) indices for use in the training set for both class 0 and 1 data sets
+train_set_0 = range(0, len(Targets_class_0))
+train_set_1 = range(0, len(Targets_class_0))
+
+random.shuffle(train_set_0)
+random.shuffle(train_set_1)
+
+#saves the remaining (percent_train) indices for use in the testing set for both class 0 and 1 data sets
+# test_set_0 = set(range(0,len(Targets_class_0))).difference(set(train_set_0))
+# test_set_1 = set(range(0,len(Targets_class_1))).difference(set(train_set_1))
+
+X_train = []
+y_train = []
+
+#train set
+
+
+
+for i in train_set_0:
+    X_train.append(Data_class_0[i])
+    y_train.append(Targets_class_0[i])
+for i in train_set_1:
+    X_train.append(Data_class_1[i])
+    y_train.append(Targets_class_1[i])
+
+#test set
+#
+# X_test = []
+# y_test = []
+#
+# for i in test_set_0:
+#     X_test.append(Data_class_0[i])
+#     y_test.append(Targets_class_0[i])
+# for i in test_set_1:
+#     X_test.append(Data_class_1[i])
+#     y_test.append(Targets_class_1[i])
+
+# X_test = np.asarray(X_test)
+X_train = np.asarray(X_train)
+y_train = np.asarray(y_train)
+# y_test = np.asarray(y_test)
+
+# --------------------------------------------------------------------------
+# --------------------------------------------------------------------------
+
+pipe = Pipeline([('cut', CenterCutCubes(size_cubes=3, plane_jump=2, x1=10, y1=10, z1=10, x2=170, y2=200, z2=170)),
                 ('var', VarianceThreshold()),
-                ('sel', Select(type='f_value', threshold=0.1)),
-                ('scl', StandardScaler()),
-                ('pca', PCA(n_components=250))])
+                ('sel', Select(type='f_value', threshold=0.1))])
 
 
 # gs = GridSearchCV(estimator=pipe,
@@ -63,7 +134,7 @@ X_train_t = pipe.transform(X_train)
 #best_pipe = gs.best_estimator_
 #print gs.best_params_
 
-bagging = BaggingClassifier(base_estimator=SVC(C=0.1, kernel='rbf', gamma=0.00001, class_weight={0:3, 1:1}), n_estimators=10, n_jobs=-1, verbose=10, max_samples=0.5)
+bagging = BaggingClassifier(base_estimator=GaussianNB(), n_estimators=10, n_jobs=-1, verbose=10)
 
 #best_pipe.fit(X_train, y_train)
 bagging.fit(X_train_t, y_train)
@@ -95,7 +166,7 @@ X_test_t = pipe.transform(X_test)
 #predictions = best_pipe.predict(X_test)
 predictions = bagging.predict(X_test_t)
 
-with open("Scores.csv", mode='w') as f:
+with open("Scores_traintest.csv", mode='w') as f:
     f.write("ID,Prediction\n")
     for idx, pred in enumerate(predictions):
         pred = round(pred, 0)
