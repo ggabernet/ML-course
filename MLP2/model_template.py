@@ -18,6 +18,8 @@ from sklearn.metrics import log_loss
 import matplotlib.pyplot as plt
 from skimage.filters import roberts, sobel, scharr, prewitt, gaussian
 from sklearn.naive_bayes import GaussianNB, BernoulliNB
+from nibabel import processing
+from scipy import ndimage
 
 #############################################
 #       Data loading and preprocessing      #
@@ -25,20 +27,21 @@ from sklearn.naive_bayes import GaussianNB, BernoulliNB
 
 Targets = np.genfromtxt("data/targets.csv")
 
-[x_low, x_up] = [70, 160]
-[y_low, y_up] = [65, 120]
-[z_low, z_up] = [70, 50]
+[x_low, x_up] = [50, 120]
+[y_low, y_up] = [80, 150]
+[z_low, z_up] = [50, 100]
 
 Data = []
 for i in range(1, 279):
+    print "Train image ", str(i), "processed"
     imagefile = nib.load("data/set_train/train_"+str(i)+".nii")
+    imagefile = processing.smooth_image(imagefile, 1)
     image = imagefile.get_data()
-    I = image[:, :, 80, 0]
-    #I=I[x_low:x_up, y_low:y_up]
+    I = image[:, :, :, 0]
+    I=I[x_low:x_up, y_low:y_up]
     I = np.asarray(I, dtype=float)
-    #I = gaussian(I, sigma=0.5)
+    I = I/np.max(I)
     imagefile.uncache()
-    I = I / np.max(I)
     I = I.flatten(order='C')
     Data.append(np.asarray(I))
 
@@ -120,18 +123,19 @@ y_test = np.asarray(y_test)
 #         Fit model          #
 ##############################
 
-# X_train, X_test, y_train, y_test = train_test_split(Data, Targets, test_size=0.33,random_state=42)
+#X_train, X_test, y_train, y_test = train_test_split(Data, Targets, test_size=0.33,random_state=42)
 
+clf = linear_model.LogisticRegression()
 
 best_pipe = Pipeline([('scl', StandardScaler()),
                   ('var', VarianceThreshold()),
-                  ('pca', PCA(n_components=10)),
-                  ('clf', SVC(kernel='linear', C=0.1))])
+                  ('pca', PCA(n_components=5)),
+                  ('clf', clf)])
 
 best_pipe.fit(X_train, y_train)
 
-print "Log Loss :", log_loss(y_train,best_pipe.predict(X_train))
-print "Log Loss :", log_loss(y_test,best_pipe.predict(X_test))
+print "Log Loss :", log_loss(y_train,best_pipe.predict_proba(X_train), normalize='False', labels=[0,1])
+print "Log Loss :", log_loss(y_test,best_pipe.predict_proba(X_test),normalize='False', labels=[0,1])
 
 
 ##############################
@@ -140,22 +144,21 @@ print "Log Loss :", log_loss(y_test,best_pipe.predict(X_test))
 
 Data_test = []
 for i in range(1, 139):
+    print "Test image ", str(i), "processed"
     imagefile = nib.load("data/set_test/test_"+str(i)+".nii")
+    imagefile = processing.smooth_image(imagefile, 1)
     image = imagefile.get_data()
-    I = image[80, :, :, 0]
-    I=I[x_low:x_up, y_low:y_up]
-    I = np.asarray(I, dtype=float)
-    I = gaussian(I, sigma=0.5)
+    I = image[:, :, :, 0]
+    I = I[x_low:x_up, y_low:y_up]
     I = I/np.max(I)
     I=I.flatten(order='C')
     Data_test.append(np.asarray(I))
 
 X_test = Data_test
 
-predictions = best_pipe.predict(X_test)
+predictions = best_pipe.predict_proba(X_test)
 
-with open("SubmissionOptimizedCombinedModel3.csv", mode='w') as f:
+with open("Submission_fixed.csv", mode='w') as f:
     f.write("ID,Prediction\n")
     for idx, pred in enumerate(predictions):
-        pred = round(pred,0)
-        f.write(str(idx+1)+','+str(pred)+'\n')
+        f.write(str(idx+1)+','+str(pred[1])+'\n')
