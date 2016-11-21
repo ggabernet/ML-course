@@ -29,14 +29,11 @@ for i in range(1, 279):
 
 print I.shape
 
-
-
-
 X_train, X_test, y_train, y_test = \
      train_test_split(Data, Targets, test_size=0.33, random_state=42)
 
 
-ccc = CenterCutCubes(size_cubes=3, plane_jump=2, y1=10, x1=10, z1=10, x2=170, y2=170, z2=200)
+ccc = CenterCutCubes(size_cubes=5, plane_jump=1,  y1=10, x1=10, z1=10, x2=170, y2=170, z2=200)
 ccc.fit(X_train)
 X_train = ccc.transform(X_train)
 X_train = np.array(X_train)
@@ -45,18 +42,10 @@ X_test = np.array(X_test)
 print X_train.shape
 print X_test.shape
 #
-v=VarianceThreshold(0.01)
+v=VarianceThreshold()
 v.fit(X_train)
 X_train=v.transform(X_train)
 X_test=v.transform(X_test)
-print X_train.shape
-print X_test.shape
-#
-s=Select(type="mutual_info",threshold=0.01)
-s.fit(X_train,y_train)
-X_train=s.transform(X_train)
-X_test=s.transform(X_test)
-#
 print X_train.shape
 print X_test.shape
 #
@@ -65,7 +54,7 @@ sc.fit(X_train)
 X_train=sc.transform(X_train)
 X_test=sc.transform(X_test)
 #
-pc=PCA(n_components=100)
+pc=PCA(n_components=250)
 pc.fit(X_train)
 X_train=pc.transform(X_train)
 X_test=pc.transform(X_test)
@@ -78,7 +67,7 @@ pipe = Pipeline([#('cut', CenterCutCubes(size_cubes=3, plane_jump=3)),
                  #('sel', Select(type="f_value",threshold=0.1)),
                  #('scl', StandardScaler()),
                  #('pca', PCA( n_components=100)),
-                 ('clf', SVC(C=1, kernel="rbf", class_weight={0:3,1:1}))])
+                 ('clf', SVC(C=0.1, kernel="linear"))])
 
 
 gs = GridSearchCV(estimator=pipe,
@@ -92,10 +81,8 @@ gs = GridSearchCV(estimator=pipe,
                                 #'clf__n_estimators': [10,50,100]}],
                                 #'pca__n_components': [10],
                                 #'sel__type': ["f_value"],
-                                'clf__kernel': ["linear","rbf"],
-                                'clf__degree': [2],
-                                'clf__gamma': [0.001,0.00001],
-                                'clf__C': [0.1,0.01,0.0001]}],
+                                'clf__kernel': ["linear"],
+                                'clf__C': [0.1]}],
                    error_score=999,
                    cv=5,
                    n_jobs=1,
@@ -139,15 +126,13 @@ X_test = np.array(X_test)
 #
 X_test=v.transform(X_test)
 #
-X_test=s.transform(X_test)
-#
 X_test=sc.transform(X_test)
 #
 X_test=pc.transform(X_test)
 
 
 
-predictions = best_pipe.predict(X_test)
+predictions = best_pipe.(X_test)
 
 with open("Scores.csv", mode='w') as f:
     f.write("ID,Prediction\n")
