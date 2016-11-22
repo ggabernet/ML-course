@@ -147,18 +147,21 @@ class ML_brain:
 
         X_train, X_test, y_train, y_test = train_test_split(validate_input_data, validate_output_data, test_size=prop_test, random_state=42, stratify=validate_output_data)
 
+        #X_train = validate_input_data
+        #y_train = validate_output_data
         # regression machine classifier
 
         #clf=linear_model.Lasso(alpha=linear_alpha)
         #clf = linear_model.LogisticRegression()
         #clf = LinearSVC()
-        clf = QuadraticDiscriminantAnalysis()
+        #clf = QuadraticDiscriminantAnalysis()
 
 
         #kernel = 1.0 * RBF([2.0])
         #clf = GaussianProcessClassifier()
 
-        #clf = linear_model.LogisticRegression()
+        clf = linear_model.LogisticRegression()
+        #clf = GaussianNB()
 
         #regression machine classifier
         regr = Pipeline([('scl', StandardScaler()),
@@ -178,7 +181,7 @@ class ML_brain:
         Train_target_data = self.target_to_data()
         ignore_index=self.data_processing(Train_image_data,Train_target_data)
         Train_filtered=self.filter_pixels(Train_image_data,ignore_index)
-        regr = self.validation(Train_filtered, Train_target_data, 0.2, 10, 0.33)
+        regr = self.validation(Train_filtered, Train_target_data, 0.2, 7, 0.33)
         #validation(self, validate_input_data, validate_output_data, linear_alpha, n_pca, prop_test):
 
         #regr=self.cross_validation(np.transpose(Train_image_data),Train_target_data, 5, 250, 10)
@@ -197,7 +200,7 @@ class ML_brain:
         print 'apply model : step complete'
 
 #Runs the model with the input parameters
-x=ML_brain('3D', 80, 1, 0, 75)
+x=ML_brain('2D', 80, 1, 0, 50)
 #x=ML_brain(dimension_selection, slice_number, smoothing_sigma, gauss_sigma, threshold)
 x.apply_model(0)
 #x.apply_model(test_option)
