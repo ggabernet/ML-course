@@ -30,7 +30,7 @@ for i in range(1, 279):
 print I.shape
 
 
-ccc = CenterCutCubes(size_cubes=2, plane_jump=3, y1=30, x1=30, z1=30, x2=150, y2=170, z2=140)
+ccc = CenterCutCubes(size_cubes=2, plane_jump=1, x1=50, y1=80, z1=50, x2=120, y2=150, z2=100)
 ccc.fit(Data[:100])
 Data_ccc = ccc.transform(Data[:100])
 Data_ccc = np.array(Data_ccc)
