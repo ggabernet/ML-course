@@ -75,18 +75,23 @@ class CheckrPixl:
 class Covariance:
     def __init__(self):
         self.cov_matrix = []
+        self.corr_matrix = []
 
-    def calculate_covariance(self, X, y):
+    def calculate_covariance(self, X, y, thr):
         data = []
-        for n in X:
-            data.append(n.flatten(order='C'))
-        data = np.asarray(data)
+        #for n in X:
+        #    data.append(n.flatten(order='C'))
+        data = np.asarray(X)
         cov_mat = []
+        corr_mat = []
         for i in range(1,data.shape[1]):
             cov = np.mean(np.dot(data[i,:],y))-np.mean(data[i,:])*np.mean(y)
-            cov_mat.append(cov)
+            corr = cov / (np.var(data[i,:])*np.var(y))
+            if corr > thr:
+                cov_mat.append(cov)
+                corr.append(corr)
         self.cov_matrix = cov_mat
-        return self
+        return corr_mat
 
 
 class Filtering:

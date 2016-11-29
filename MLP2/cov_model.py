@@ -60,6 +60,7 @@ print Target_data
 for i in range(1,Image_dimension):
 	print "processed cov:", i
 	cov=np.mean(np.dot(X_data[i,:],Target_data))-np.mean(X_data[i,:])*np.mean(Target_data)
+	corr = cov / (np.std(X_data[i,:]) * np.std(Target_data))
 	if cov > threshold:
 		X_cov[i]=cov
 		X_corr[i] = cov / (np.std(X_data) * np.std(Target_data))
@@ -69,7 +70,7 @@ for i in range(1,Image_dimension):
 Data=np.delete(X_data, ignore_index ,axis=0)
 Data=np.transpose(Data)
 
-plt.imshow(X_cov.reshape(176,208))
+plt.imshow(X_corr.reshape(176,208))
 plt.show()
 
 

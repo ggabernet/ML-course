@@ -16,67 +16,34 @@ from sklearn.ensemble import AdaBoostClassifier, RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import LinearSVC
 from sklearn.feature_selection import mutual_info_classif, f_classif
-
+from scipy import ndimage
+from sklearn import linear_model
 Targets = np.genfromtxt("data/targets.csv")
 
 Data = []
 for i in range(1, 279):
     imagefile = nib.load("data/set_train/train_"+str(i)+".nii")
     image = imagefile.get_data()
-    I = image[:, :, :, 0]
+    I = I[:,:,:,0]
     imagefile.uncache()
     Data.append(np.asarray(I))
 
-print I.shape
-
-
-ccc = CenterCutCubes(size_cubes=2, plane_jump=1, x1=50, y1=80, z1=50, x2=120, y2=150, z2=100)
-ccc.fit(Data[:100])
-Data_ccc = ccc.transform(Data[:100])
-Data_ccc = np.array(Data_ccc)
-print Data_ccc.shape
-#
-v=VarianceThreshold(1)
-v.fit(Data_ccc)
-Data_ccc=v.transform(Data_ccc)
-print Data_ccc.shape
-#
-s=Select(type="f_value",threshold=0.1)
-s.fit(Data_ccc[:100],Targets[:100])
-Data_ccc=s.transform(Data_ccc)
-#
-print Data_ccc.shape
-#
-
-
 X_train, X_test, y_train, y_test = \
-     train_test_split(Data, Targets, test_size=0.33, random_state=42)
+     train_test_split(Data, Targets, test_size=0.33, random_state=42, stratify=Targets)
 
 #mut_inf = mutual_info_classif(np.array(X_train_ccc), y_train, discrete_features='auto', n_neighbors=3, copy=True, random_state=None)
 
 
-pipe = Pipeline([('cut', CenterCutCubes(size_cubes=2, plane_jump=3)),
-                 ('var', VarianceThreshold(1)),
-                 ('sel', Select(type="f_value",threshold=0.1)),
+pipe = Pipeline([('cut', CenterCutCubes(size_cubes=2, plane_jump=1)),
+                 ('var', VarianceThreshold(0.1)),
+                 ('sel', Select(type="mutual_info",threshold=0.1)),
                  ('scl', StandardScaler()),
-                 ('pca', PCA( n_components=100)),
-                 ('clf', SVC(kernel="linear",degree=2))])
+                 ('pca', PCA( n_components=5)),
+                 ('clf', SVC(kernel="linear", C=0.0001))])
 
 
 gs = GridSearchCV(estimator=pipe,
-                   param_grid=[{'cut__size_cubes': [2],
-                                'cut__y1': [30],
-                                'cut__x1': [30],
-                                'cut__z1': [30],
-                                'cut__x2': [150],
-                                'cut__y2': [170],
-                                'cut__z2': [140],
-                                #'clf__n_estimators': [10]}],
-                                'pca__n_components': [100],
-                                'sel__type': ["f_value"],
-                                'clf__kernel': ["linear","poly","rbf"],
-                                'clf__degree': [2],
-                                'clf__C': [0.01,0.1,1]}],
+                   param_grid=[{'clf__C': [0.0001]}],
                    error_score=999,
                    cv=5,
                    n_jobs=1,
@@ -111,6 +78,9 @@ for i in range(1, 139):
     imagefile = nib.load("data/set_test/test_"+str(i)+".nii")
     image = imagefile.get_data()
     I = image[:, :, :, 0]
+    #filters (AB edition)
+    I = ndimage.gaussian_filter(I, sigma=1)
+    I = ndimage.prewitt(I, axis=0)
     Data_test.append(np.asarray(I))
 
 # Data_ccc = ccc.transform(Data_test)
