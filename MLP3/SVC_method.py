@@ -16,13 +16,15 @@ from sklearn.ensemble import BaggingClassifier
 from sklearn.metrics import hamming_loss
 from sklearn import svm
 from sklearn.multiclass import OneVsRestClassifier
-from sklearn.svm import LinearSVC
+from sklearn.svm import LinearSVC, SVC
 from sklearn.preprocessing import MultiLabelBinarizer
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.multioutput import MultiOutputClassifier\
 
 from scipy import ndimage
+from sklearn.multiclass import OneVsRestClassifier
+from sklearn.multiclass import OneVsOneClassifier
 
 Targets = []
 target_file=open('data/targets.csv','r')
@@ -37,48 +39,48 @@ Data = []
 for i in range(1, 279):
     imagefile = nib.load("data/set_train/train_"+str(i)+".nii")
     image = imagefile.get_data()
-    I = image[:, :, :, 0]
-    imagefile.uncache()
+    I = image[:,:,:, 0]
     I = I.flatten(order='C')
+    imagefile.uncache()
     Data.append(np.asarray(I))
 
 Data = np.asarray(Data)
 
-#X_train, X_test, y_train, y_test = \
-#      train_test_split(Data, Targets, test_size=0.33, random_state=42)#, stratify=Targets)
+X_train, X_test, y_train, y_test = \
+      train_test_split(Data, Targets, test_size=0.33, random_state=42)#, stratify=Targets)
 
-X_train = Data
-y_train = Targets
+#X_train = Data
+#y_train = Targets
 
 print 'Fitting process started'
 
-forest = RandomForestClassifier(n_estimators=100, random_state=1)
+forest = SVC(kernel='linear',C=5)
+
 clf = MultiOutputClassifier(forest)
 
-pipe = Pipeline([#('cut', CenterCutCubes(size_cubes=5, plane_jump=1, x1=50, y1=80, z1=50, x2=120, y2=150, z2=100)),
-                ('var', VarianceThreshold()),
-                #('sel', Select(type='mutual_info', threshold=0.1)),
-                ('scl', StandardScaler()),
-                ('pca', PCA(n_components=5)),
-                ('clf', clf)
-                ])
+pipe = Pipeline([#('cut', CenterCutCubes(size_cubes=10, plane_jump=1, x1=50, y1=80, z1=50, x2=120, y2=150, z2=100)),
+                  ('var', VarianceThreshold()),
+                  #('sel', Select(type='mutual_info', threshold=0.1)),
+                  ('scl', StandardScaler()),
+                  #('pca', PCA(n_components=15)),
+                  ('clf',clf)])
+print 'pipe done'
 
 pipe.fit(X_train,y_train)
 
-print "Train - hamming loss :", hamming_loss(y_train.flatten(),clf.predict(X_train).flatten())
-#print "Test - hamming loss :", hamming_loss(y_test.flatten(),clf.predict(X_test).flatten())
+print "Train - hamming loss :", hamming_loss(y_train.flatten(),pipe.predict(X_train).flatten())
+print "Test - hamming loss :", hamming_loss(y_test.flatten(),pipe.predict(X_test).flatten())
 
 Data_test = []
 for i in range(1, 139):
-    print "Test image ", str(i), "processed"
     imagefile = nib.load("data/set_test/test_"+str(i)+".nii")
     image = imagefile.get_data()
-    I = image[:, :, :, 0]
-    imagefile.uncache()
+    I = image[:,:,:, 0]
     I = I.flatten(order='C')
+    imagefile.uncache()
     Data_test.append(np.asarray(I))
 
-output_data = clf.predict(Data_test)
+output_data = pipe.predict(Data_test)
 
 ###########################################
 #      WRITING DATA IN OUTPUT FORMAT      #
@@ -97,7 +99,7 @@ health = ['health,False' if x == '0' else 'health,True' for x in health]
 
 output_labeled = np.column_stack((gender,age,health))
 
-with open("sub.csv", mode='w') as f:
+with open("sub_base.csv", mode='w') as f:
     f.write("ID,Sample,Label,Predicted\n")
     index=0
     for idx, pred in enumerate(output_labeled):
@@ -105,3 +107,4 @@ with open("sub.csv", mode='w') as f:
             f.write(str(index)+','+str(idx)+','+str(i)+'\n')
             index = index + 1
 
+print "Test image successfully processed"
