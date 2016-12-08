@@ -70,16 +70,16 @@ class ML_brain:
             self.Number_of_images=138
 
         if self.dimension_option == '2D':
-            [row_low, row_up] = [65, 150]
-            [column_low, column_up] = [60, 150]
+            [row_low, row_up] = [0, 176]
+            [column_low, column_up] = [0, 208]
             test_image_change = self.test_image[row_low:row_up, column_low:column_up]
             [w, h] = test_image_change.shape
             self.image_dimension = w * h
             self.dim = [w, h]
         elif self.dimension_option == '3D':
-            [row_low, row_up] = [20, 150]
-            [column_low, column_up] = [20, 150]
-            [width_low, width_up] = [20, 150]
+            [row_low, row_up] = [20, 50]
+            [column_low, column_up] = [20, 50]
+            [width_low, width_up] = [20, 50]
             test_image_change = self.test_image[row_low:row_up, column_low:column_up, width_low:width_up]
             [w, h, l] = test_image_change.shape
             self.image_dimension = w * h * l
@@ -98,7 +98,7 @@ class ML_brain:
                 I = np.asarray(I, dtype=float)
                 I = I[row_low:row_up, column_low:column_up]
                 # scale data
-                I = I / np.max(I)
+                #I = I / np.max(I)
                 # Image processing
                 #I = prewitt(I)  # Edge detection
                 #I = gaussian(I, sigma=self.gauss)  # Gaussian blurring of the edges
@@ -144,11 +144,24 @@ class ML_brain:
         return filtered_data
 
     def validation(self, validate_input_data, validate_output_data, linear_alpha, n_pca, prop_test):
+        # random_index=np.random.randint(0,np.max(validate_output_data),int(278*(1-0.33)))
+        #
+        # #random_index = np.random.normal(np.max(validate_output_data)/2,50,100)
+        # random_index=random_index.astype(int)
+        # random_index=np.unique(random_index)
+        #
+        # X_train = validate_input_data[random_index]
+        # print X_train.shape
+        # X_test = np.delete(validate_input_data, random_index, axis=0)
+        # print X_test.shape
+        # y_train = validate_output_data[random_index]
+        # y_test = np.delete(validate_output_data, random_index, axis=0)
 
-        X_train, X_test, y_train, y_test = train_test_split(validate_input_data, validate_output_data, test_size=prop_test, random_state=42, stratify=validate_output_data)
+        X_train, X_test, y_train, y_test = train_test_split(validate_input_data, validate_output_data, test_size=prop_test, random_state=42)
 
         #X_train = validate_input_data
         #y_train = validate_output_data
+
         # regression machine classifier
 
         #clf=linear_model.Lasso(alpha=linear_alpha)
@@ -160,19 +173,36 @@ class ML_brain:
         #kernel = 1.0 * RBF([2.0])
         #clf = GaussianProcessClassifier()
 
-        clf = linear_model.LogisticRegression()
         #clf = GaussianNB()
 
         #regression machine classifier
         regr = Pipeline([('scl', StandardScaler()),
                           ('pca', PCA(n_components=n_pca)),
-                         ('clf', clf)])
+                         ('clf', SVC(kernel='rbf'))])
+
+        #regr=MLPClassifier(solver='lbfgs', alpha=15, hidden_layer_sizes=(1,100), random_state=1)
 
         regr.fit(X_train, y_train)
 
-        print "Log Loss train:", log_loss(y_train, regr.predict_proba(X_train))
-        print "Log Loss test:", log_loss(y_test,regr.predict_proba(X_test))
+        print "Log Loss train:", log_loss(y_train, regr.predict(X_train))
+        print "Log Loss test:", log_loss(y_test,regr.predict(X_test))
 
+        # #Plotiting options
+        # print len(range(1,len(y_test)+1))
+        # print len(y_test)
+        # print len(regr.predict(X_train))
+        # plt.scatter(range(1, len(y_train) + 1), 2 + abs(y_train-regr.predict(X_train)), color = 'Red')
+        # plt.scatter(range(1,len(y_test)+1), 5 + abs(y_test-regr.predict(X_test)), color='Blue')
+        #
+        # axes = plt.gca()
+        # axes.set_xlim([0,len(y_test)+2])
+        # axes.set_ylim([0,10])
+        #
+        # plt.xlabel('Patients')
+        # plt.ylabel('Class Prediction (upper = wrong class, lower = correct class)')
+        #
+        # plt.plot()
+        # plt.show()
         print 'cross validation  : step complete'
         return regr
 
@@ -181,7 +211,7 @@ class ML_brain:
         Train_target_data = self.target_to_data()
         ignore_index=self.data_processing(Train_image_data,Train_target_data)
         Train_filtered=self.filter_pixels(Train_image_data,ignore_index)
-        regr = self.validation(Train_filtered, Train_target_data, 0.2, 7, 0.33)
+        regr = self.validation(Train_filtered, Train_target_data, 0.2, 5, 0.33)
         #validation(self, validate_input_data, validate_output_data, linear_alpha, n_pca, prop_test):
 
         #regr=self.cross_validation(np.transpose(Train_image_data),Train_target_data, 5, 250, 10)
@@ -193,14 +223,14 @@ class ML_brain:
             output=open('Submission.csv','w+')
             output.write("ID,Prediction"+'\n')
 
-            for idx, line in enumerate(regr.predict_proba(Test_image_filtered)):
-                print line[1]
-                output.write(str(idx+1)+','+str(line[1])+'\n')
+            for idx, line in enumerate(regr.predict(Test_image_filtered)):
+                print line
+                output.write(str(idx+1)+','+str(line)+'\n')
             output.close()
         print 'apply model : step complete'
 
 #Runs the model with the input parameters
-x=ML_brain('2D', 80, 1, 0, 50)
+x=ML_brain('3D', 80, 1, 0, 75)
 #x=ML_brain(dimension_selection, slice_number, smoothing_sigma, gauss_sigma, threshold)
 x.apply_model(0)
 #x.apply_model(test_option)

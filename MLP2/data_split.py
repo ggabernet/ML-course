@@ -43,10 +43,10 @@ y_train = []
 #train set
 
 for i in train_set_0:
-    X_train.append(Data_class_0[i][0])
+    X_train.append(Data_class_0[i])
     y_train.append(Targets_class_0[i])
 for i in train_set_1:
-    X_train.append(Data_class_1[i][0])
+    X_train.append(Data_class_1[i])
     y_train.append(Targets_class_1[i])
 
 #test set
@@ -55,9 +55,14 @@ X_test = []
 y_test = []
 
 for i in test_set_0:
-    X_test.append(Data_class_0[i][0])
+    X_test.append(Data_class_0[i])
     y_test.append(Targets_class_0[i])
 for i in test_set_1:
-    X_test.append(Data_class_1[i][0])
+    X_test.append(Data_class_1[i])
     y_test.append(Targets_class_1[i])
+
+X_train = np.asarray(X_train)
+X_test = np.asarray(X_test)
+y_train = np.asarray(y_train)
+y_test = np.asarray(y_test)
 
