@@ -6,7 +6,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
-from sklearn.feature_selection import VarianceThreshold, mutual_info_classif
+from sklearn.feature_selection import VarianceThreshold
 from sklearn.metrics import *
 from sklearn.model_selection import GridSearchCV
 from sklearn.svm import SVC
@@ -17,6 +17,7 @@ from scipy import ndimage
 
 from sklearn import linear_model
 import matplotlib.pyplot as plt
+
 
 Targets = np.genfromtxt("data/targets.csv")
 
