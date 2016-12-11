@@ -33,7 +33,7 @@ for lines in target_file:
     lines = lines.split(',')
     Targets.append(lines)
 
-Targets = np.asarray(Targets)
+Targets = np.asarray(Targets, dtype=int)
 
 Data = []
 for i in range(1, 279):
@@ -45,27 +45,27 @@ for i in range(1, 279):
 
 Data = np.asarray(Data)
 
-X_train, X_test, y_train, y_test = \
-      train_test_split(Data, Targets, test_size=0.33, random_state=42)#, stratify=Targets)
-
-#X_train = Data
-#y_train = Targets
-
 print 'Fitting process started'
 
-forest = RandomForestClassifier(n_estimators=1, random_state=1)
+#forest = OneVsRestClassifier(RandomForestClassifier(n_estimators=5,random_state=1))
+#clf = MultiOutputClassifier(forest)
 
-clf = MultiOutputClassifier(forest)
+clf = SVC(kernel='linear',C=1)
 
 pipe_list=[]
 
 for Class in np.transpose(Targets):
-    Class = np.transpose(Class)
+    Targets = np.transpose(Class)
 
-    pipe = Pipeline([('cut', CenterCutCubes(size_cubes=5, plane_jump=1, x1=50, y1=80, z1=50, x2=120, y2=150, z2=100)),
-                      #('var', VarianceThreshold()),
-                      #('sel', Select(type='mutual_info', threshold=0.1)),
-                      #('scl', StandardScaler()),
+    X_train, X_test, y_train, y_test = train_test_split(Data, Targets, test_size=0.33, random_state=42)  # , stratify=Targets)
+
+    # X_train = Data
+    # y_train = Targets
+
+    pipe = Pipeline([('cut', CenterCutCubes(size_cubes=5, plane_jump=1, x1=50, y1=40, z1=70, x2=160, y2=135, z2=120)),
+                      ('var', VarianceThreshold()),
+                      ('sel', Select(type='mutual_info', threshold=0.1)),
+                      ('scl', StandardScaler()),
                       #('pca', PCA(n_components=5)),
                       ('clf',clf)])
     print 'pipe done'
@@ -104,13 +104,13 @@ gender = output_data[:,0]
 age = output_data[:,1]
 health = output_data[:,2]
 
-gender = ['gender,False' if x == '0' else 'gender,True' for x in gender]
-age = ['age,False' if x == '0' else 'age,True' for x in age]
-health = ['health,False' if x == '0' else 'health,True' for x in health]
+gender = ['gender,False' if x == 0 else 'gender,True' for x in gender]
+age = ['age,False' if x == 0 else 'age,True' for x in age]
+health = ['health,False' if x == 0 else 'health,True' for x in health]
 
 output_labeled = np.column_stack((gender,age,health))
 
-with open("sub_base.csv", mode='w') as f:
+with open("sub_alt.csv", mode='w') as f:
     f.write("ID,Sample,Label,Predicted\n")
     index=0
     for idx, pred in enumerate(output_labeled):

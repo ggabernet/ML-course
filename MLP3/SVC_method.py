@@ -39,26 +39,25 @@ Data = []
 for i in range(1, 279):
     imagefile = nib.load("data/set_train/train_"+str(i)+".nii")
     image = imagefile.get_data()
-    I = image[:,:,80,0]
-    I = I.flatten(order='C')
+    I = image[:,:,:,0]
     imagefile.uncache()
     Data.append(np.asarray(I))
 
 Data = np.asarray(Data)
 
-#X_train, X_test, y_train, y_test = \
-#      train_test_split(Data, Targets, test_size=0.33, random_state=42)#, stratify=Targets)
+X_train, X_test, y_train, y_test = \
+      train_test_split(Data, Targets, test_size=0.33, random_state=42)#, stratify=Targets)
 
-X_train = Data
-y_train = Targets
+#X_train = Data
+#y_train = Targets
 
 print 'Fitting process started'
 
-forest = SVC(kernel='linear',C=0.1)
+forest = OneVsRestClassifier(SVC())
 
 clf = MultiOutputClassifier(forest)
 
-pipe = Pipeline([#('cut', CenterCutCubes(size_cubes=10, plane_jump=1, x1=50, y1=80, z1=50, x2=120, y2=150, z2=100)),
+pipe = Pipeline([('cut', CenterCutCubes(size_cubes=5, plane_jump=1, x1=50, y1=45, z1=70, x2=160, y2=130, z2=140)),
                   #('var', VarianceThreshold()),
                   #('sel', Select(type='mutual_info', threshold=0.1)),
                   #('scl', StandardScaler()),
@@ -69,14 +68,13 @@ print 'pipe done'
 pipe.fit(X_train,y_train)
 
 print "Train - hamming loss :", hamming_loss(y_train.flatten(),pipe.predict(X_train).flatten())
-#print "Test - hamming loss :", hamming_loss(y_test.flatten(),pipe.predict(X_test).flatten())
+print "Test - hamming loss :", hamming_loss(y_test.flatten(),pipe.predict(X_test).flatten())
 
 Data_test = []
 for i in range(1, 139):
     imagefile = nib.load("data/set_test/test_"+str(i)+".nii")
     image = imagefile.get_data()
-    I = image[:,:,80,0]
-    I = I.flatten(order='C')
+    I = image[:,:,:,0]
     imagefile.uncache()
     Data_test.append(np.asarray(I))
 
