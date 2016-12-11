@@ -9,45 +9,8 @@ from sklearn.feature_selection import mutual_info_classif, f_classif, chi2
 import matplotlib.pyplot as plt
 
 
-class CenterCut:
-    def __init__(self):
-        self.cut = []
-        self.descriptor = []
-    def make_cut(self, X, x1=50, x2=120, y1=50, y2=150, z1=50, z2=100):
-        cut = []
-        for n in X:
-            cut.append(n[x1:x2,y1:y2,z1:z2])
-        self.cut = cut
-        return self
-    def make_cubes(self, X, size_cubes, plane_jump):
-        descriptor = []
-        for n in X:
-            int_cubes = []
-            for i in range(0, n.shape[0], size_cubes):
-                for j in range(0, n.shape[1], size_cubes*plane_jump):
-                    for k in range(0, n.shape[2], size_cubes):
-                        cube = n[i:i + size_cubes, j:j + size_cubes, k:k + size_cubes]
-                        int_cubes.append(self._get_array_intensity_max(cube))
-            descriptor.append(int_cubes)
-
-        self.descriptor = np.asarray(descriptor)
-        return self
-
-    def _get_array_intensity_sum(self, array):
-        arrArray = np.asarray(array)
-        arrFlat = arrArray.flatten(order='C')
-        intensity = np.sum(arrFlat)/np.size(arrFlat)
-        return intensity
-
-    def _get_array_intensity_max(self, array):
-        arrArray = np.asarray(array)
-        arrFlat = arrArray.flatten(order='C')
-        intensity = np.max(arrFlat)
-        return intensity
-
-
 class CenterCutCubes(BaseEstimator, TransformerMixin):
-    def __init__(self, size_cubes, plane_jump, x1=50, x2=120, y1=50, y2=150, z1=50, z2=100):
+    def __init__(self, size_cubes, plane_jump=1, x1=50, x2=120, y1=50, y2=150, z1=50, z2=100):
         self.cut = []
         self.descriptor = []
         self.x1 = x1
@@ -171,6 +134,7 @@ class Filtering:
             flat.append(n.flatten(order='C'))
         return np.asarray(flat)
 
+# TODO: add gaussian preprocessing
 
 class CovSel(BaseEstimator, TransformerMixin):
     def __init__(self, cut_off=0.5):
@@ -422,13 +386,16 @@ class Select(BaseEstimator, TransformerMixin):
     def fit(self, X, y):
         if self.type =="f_value":
             vals = f_classif(X, y)[0]
+            self.index = np.where(vals > self.threshold)[0]
         if self.type =="p_value":
             vals = f_classif(X, y)[1]
+            self.index = np.where(vals < self.threshold)[0]
         if self.type == "mutual_info":
             vals = mutual_info_classif(X, y)
+            self.index = np.where(vals > self.threshold)[0]
         if self.type == "chi2":
             vals = chi2(X, y)[0]
-        self.index = np.where(vals < self.threshold)[0]
+            self.index = np.where(vals < self.threshold)[0]
         return self
 
     def transform(self,X,y=None):
@@ -471,4 +438,3 @@ class PvalSelect(BaseEstimator, TransformerMixin):
     def plot_pvals_histogram(self):
         plt.hist(self._compute_pvals(), bins=20, range=(0, 1))
         plt.show()
-

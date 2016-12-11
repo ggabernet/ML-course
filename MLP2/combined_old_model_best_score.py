@@ -11,12 +11,11 @@ from sklearn.feature_selection import VarianceThreshold
 from sklearn.metrics import *
 from sklearn.model_selection import GridSearchCV
 from sklearn.svm import SVC
-from sklearn.decomposition import PCA, KernelPCA, MiniBatchSparsePCA
+from sklearn.decomposition import PCA, KernelPCA
 from sklearn.ensemble import AdaBoostClassifier, RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import LinearSVC
 from sklearn.feature_selection import mutual_info_classif, f_classif
-from scipy import ndimage
 
 Targets = np.genfromtxt("data/targets.csv")
 
@@ -30,55 +29,45 @@ for i in range(1, 279):
 
 print I.shape
 
+X_train, X_test, y_train, y_test = \
+     train_test_split(Data, Targets, test_size=0.33, random_state=42)
 
 
-
-#X_train, X_test, y_train, y_test = \
-#     train_test_split(Data, Targets, test_size=0.33, random_state=42, stratify=Targets)
-X_train, y_train = Data,Targets
-
-ccc = CenterCutCubes(size_cubes=2, plane_jump=1, y1=80, x1=50, z1=50, x2=120, y2=150, z2=100)
+ccc = CenterCutCubes(size_cubes=5, plane_jump=1,  y1=10, x1=10, z1=10, x2=170, y2=170, z2=200)
 ccc.fit(X_train)
 X_train = ccc.transform(X_train)
 X_train = np.array(X_train)
-#X_test = ccc.transform(X_test)
-#X_test = np.array(X_test)
+X_test = ccc.transform(X_test)
+X_test = np.array(X_test)
 print X_train.shape
-#print X_test.shape
+print X_test.shape
 #
-v=VarianceThreshold(0.1)
+v=VarianceThreshold()
 v.fit(X_train)
 X_train=v.transform(X_train)
-#X_test=v.transform(X_test)
+X_test=v.transform(X_test)
 print X_train.shape
-#print X_test.shape
-#
-s=Select(type="mutual_info",threshold=0.1)
-s.fit(X_train,y_train)
-X_train=s.transform(X_train)
-#X_test=s.transform(X_test)
-#
-print X_train.shape
-#print X_test.shape
+print X_test.shape
 #
 sc=StandardScaler()
 sc.fit(X_train)
 X_train=sc.transform(X_train)
-#X_test=sc.transform(X_test)
+X_test=sc.transform(X_test)
 #
 pc=PCA(n_components=250)
 pc.fit(X_train)
 X_train=pc.transform(X_train)
-#X_test=pc.transform(X_test)
+X_test=pc.transform(X_test)
 print X_train.shape
-#print X_test.shape
+print X_test.shape
+
 
 pipe = Pipeline([#('cut', CenterCutCubes(size_cubes=3, plane_jump=3)),
                  #('var', VarianceThreshold(1)),
                  #('sel', Select(type="f_value",threshold=0.1)),
                  #('scl', StandardScaler()),
                  #('pca', PCA( n_components=100)),
-                 ('clf', SVC(C=1, kernel="rbf", class_weight={0:9,1:1}, probability=True))])
+                 ('clf', SVC(C=0.1, kernel="linear"))])
 
 
 gs = GridSearchCV(estimator=pipe,
@@ -93,9 +82,7 @@ gs = GridSearchCV(estimator=pipe,
                                 #'pca__n_components': [10],
                                 #'sel__type': ["f_value"],
                                 'clf__kernel': ["linear"],
-                                'clf__degree': [2],
-                                'clf__gamma': [0.001],
-                                'clf__C': [0.0001]}],
+                                'clf__C': [0.1]}],
                    error_score=999,
                    cv=5,
                    n_jobs=1,
@@ -115,12 +102,12 @@ for mean, std, params in zip(means, stds, gs.cv_results_['params']):
 best_pipe.fit(X_train, y_train)
 
 
-#y_test_predicted = best_pipe.predict_proba(X_test)
-#score_test = log_loss(y_test, y_test_predicted)
-#print("log_loss test data: " + str(score_test))
+y_test_predicted = best_pipe.predict(X_test)
+score_test = log_loss(y_test, y_test_predicted)
+print("log_loss test data: " + str(score_test))
 
 
-y_train_predicted = best_pipe.predict_proba(X_train)
+y_train_predicted = best_pipe.predict(X_train)
 score_train = log_loss(y_train, y_train_predicted)
 print("log_loss train data: " + str(score_train))
 
@@ -139,19 +126,17 @@ X_test = np.array(X_test)
 #
 X_test=v.transform(X_test)
 #
-X_test=s.transform(X_test)
-#
 X_test=sc.transform(X_test)
 #
 X_test=pc.transform(X_test)
 
 
 
-
-predictions = best_pipe.predict_proba(X_test)
+predictions = best_pipe.(X_test)
 
 with open("Scores.csv", mode='w') as f:
     f.write("ID,Prediction\n")
     for idx, pred in enumerate(predictions):
-        f.write(str(idx+1)+','+str(pred[1])+'\n')
+        pred = round(pred, 0)
+        f.write(str(idx+1)+','+str(pred)+'\n')
 
