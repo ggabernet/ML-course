@@ -204,7 +204,3 @@ x=ML_brain('2D', 80, 1, 0, 50)
 #x=ML_brain(dimension_selection, slice_number, smoothing_sigma, gauss_sigma, threshold)
 x.apply_model(0)
 #x.apply_model(test_option)
-
-
-
-

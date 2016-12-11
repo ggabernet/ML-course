@@ -72,8 +72,3 @@ Data=np.transpose(Data)
 
 plt.imshow(X_corr.reshape(176,208))
 plt.show()
-
-
-
-
-

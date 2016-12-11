@@ -34,11 +34,11 @@ for i in range(1, 279):
 
 Data = np.asarray(Data)
 
-X_train, X_test, y_train, y_test = \
-    train_test_split(Data, Targets, test_size=0.33, random_state=42, stratify=Targets)
+#X_train, X_test, y_train, y_test = \
+#      train_test_split(Data, Targets, test_size=0.33, random_state=42, stratify=Targets)
 
-#X_train = Data
-#y_train = Targets
+X_train = Data
+y_train = Targets
 
 print "fitting has started"
 
@@ -57,7 +57,7 @@ pipe.fit(X_train, y_train)
 
 
 print "Train - log loss :", log_loss(y_train,pipe.predict_proba(X_train))
-print "Test - log loss :", log_loss(y_test,pipe.predict_proba(X_test))
+#print "Test - log loss :", log_loss(y_test,pipe.predict_proba(X_test))
 
 ##############################
 #      Submission.csv        #
@@ -83,3 +83,4 @@ with open("final_sub.csv", mode='w') as f:
     f.write("ID,Prediction\n")
     for idx, pred in enumerate(predictions):
         f.write(str(idx+1)+','+str(pred[1])+'\n')
+

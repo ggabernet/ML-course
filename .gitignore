@@ -5,7 +5,13 @@ MRI/output/
 .ipynb_checkpoints
 MRI/nilearn_cache/
 MLP2/data/
-MLP2/output
+MLP2/output/
 .DS_Store
 MRI/.DS_store
 MLP2/.DS_store
+MLP3/data/
+*.zip
+MLP3/output/
+*.csv
+*.xlsx
+
