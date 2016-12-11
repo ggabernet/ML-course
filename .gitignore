@@ -13,4 +13,5 @@ MLP3/data/
 *.zip
 MLP3/output/
 *.csv
+*.xlsx
 
