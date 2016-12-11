@@ -18,26 +18,26 @@ Targets = np.genfromtxt("data/targets.csv")
 
 X_train = []
 for i in range(1, 279):
-	example = nib.load("data/set_train/train_"+str(i)+".nii")
-	image = example.get_data()
-	I = image[:, :, 80, 0]
-	I=np.asarray(I, dtype=float)
-	#scale data
-	min_max_scaler = preprocessing.MinMaxScaler()
-	I = min_max_scaler.fit_transform(I)
-	#Image processing
-	I = scharr(I)
-	Iflat = I.flatten(order='C')
-	X_train.append(Iflat)
+    example = nib.load("data/set_train/train_"+str(i)+".nii")
+    image = example.get_data()
+    I = image[:, :, 80, 0]
+    I=np.asarray(I, dtype=float)
+    #scale data
+    min_max_scaler = preprocessing.MinMaxScaler()
+    I = min_max_scaler.fit_transform(I)
+    #Image processing
+    I = scharr(I)
+    Iflat = I.flatten(order='C')
+    X_train.append(Iflat)
 Data = X_train
 
 X_train, X_test, y_train, y_test = \
-		train_test_split(Data, Targets, test_size=0.33, random_state=42)
+    train_test_split(Data, Targets, test_size=0.33, random_state=42)
 
 # regression machine classifier.
 regr = Pipeline([('scl', StandardScaler()),
-						('pca', PCA(n_components=30)),
-						('clf', SVR(kernel='linear', C=2))])
+                 ('pca', PCA(n_components=30)),
+                 ('clf', SVR(kernel='linear', C=2))])
 
 # Train the model using the training sets
 regr.fit(X_train, y_train)
@@ -73,25 +73,25 @@ plt.plot()
 true_test=[]
 
 for i in range(1, 139):
-	example = nib.load("data/set_test/test_"+str(i)+".nii")
-	image = example.get_data()
-	I = image[:, :, 80, 0]
-	I=np.asarray(I, dtype=float)
-	#scale data
-	min_max_scaler = preprocessing.MinMaxScaler()
-	I = min_max_scaler.fit_transform(I)
-	#Image processing
-	I = scharr(I)
-	Iflat = I.flatten(order='C')
-	true_test.append(Iflat)
+    example = nib.load("data/set_test/test_"+str(i)+".nii")
+    image = example.get_data()
+    I = image[:, :, 80, 0]
+    I=np.asarray(I, dtype=float)
+    #scale data
+    min_max_scaler = preprocessing.MinMaxScaler()
+    I = min_max_scaler.fit_transform(I)
+    #Image processing
+    I = scharr(I)
+    Iflat = I.flatten(order='C')
+    true_test.append(Iflat)
 
 
 output=open('Submission.csv','w+')
 output.write("ID,Prediction"+'\n')
 
 for idx, line in enumerate(regr.predict(true_test)):
-	  print line
-	  output.write(str(idx+1)+','+str(line)+'\n')
+    print line
+    output.write(str(idx+1)+','+str(line)+'\n')
 output.close()
 
 plt.show()
