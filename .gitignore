@@ -10,5 +10,8 @@ MLP2/output/
 MRI/.DS_store
 MLP2/.DS_store
 MLP3/data/
+*.zip
 MLP3/output/
 *.csv
+*.xlsx
+
