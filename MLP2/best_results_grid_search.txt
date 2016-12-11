@@ -1,0 +1,50 @@
+0.579 (+/-0.106) for {'clf__gamma': 1e-05, 'pca__n_components': 150, 'clf__C': 1e-05, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+0.579 (+/-0.106) for {'clf__gamma': 1e-05, 'pca__n_components': 200, 'clf__C': 1e-05, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+0.579 (+/-0.106) for {'clf__gamma': 0.0001, 'pca__n_components': 150, 'clf__C': 1e-05, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+0.579 (+/-0.106) for {'clf__gamma': 0.0001, 'pca__n_components': 200, 'clf__C': 1e-05, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+0.579 (+/-0.106) for {'clf__gamma': 0.001, 'pca__n_components': 150, 'clf__C': 1e-05, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+0.579 (+/-0.106) for {'clf__gamma': 0.001, 'pca__n_components': 200, 'clf__C': 1e-05, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+0.579 (+/-0.106) for {'clf__gamma': 0.01, 'pca__n_components': 150, 'clf__C': 1e-05, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+0.579 (+/-0.106) for {'clf__gamma': 0.01, 'pca__n_components': 200, 'clf__C': 1e-05, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+0.579 (+/-0.106) for {'clf__gamma': 0.1, 'pca__n_components': 150, 'clf__C': 1e-05, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+0.579 (+/-0.106) for {'clf__gamma': 0.1, 'pca__n_components': 200, 'clf__C': 1e-05, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+0.579 (+/-0.106) for {'clf__gamma': 1, 'pca__n_components': 150, 'clf__C': 1e-05, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+0.579 (+/-0.106) for {'clf__gamma': 1, 'pca__n_components': 200, 'clf__C': 1e-05, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+0.579 (+/-0.106) for {'clf__gamma': 10, 'pca__n_components': 150, 'clf__C': 1e-05, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+0.579 (+/-0.106) for {'clf__gamma': 10, 'pca__n_components': 200, 'clf__C': 1e-05, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+0.574 (+/-0.196) for {'clf__gamma': 1e-05, 'pca__n_components': 150, 'clf__C': 0.0001, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+0.574 (+/-0.196) for {'clf__gamma': 1e-05, 'pca__n_components': 200, 'clf__C': 0.0001, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+0.574 (+/-0.196) for {'clf__gamma': 0.0001, 'pca__n_components': 150, 'clf__C': 0.0001, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+0.574 (+/-0.196) for {'clf__gamma': 0.0001, 'pca__n_components': 200, 'clf__C': 0.0001, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+0.574 (+/-0.196) for {'clf__gamma': 0.001, 'pca__n_components': 150, 'clf__C': 0.0001, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+0.574 (+/-0.196) for {'clf__gamma': 0.001, 'pca__n_components': 200, 'clf__C': 0.0001, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+0.574 (+/-0.196) for {'clf__gamma': 0.01, 'pca__n_components': 150, 'clf__C': 0.0001, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+0.574 (+/-0.196) for {'clf__gamma': 0.01, 'pca__n_components': 200, 'clf__C': 0.0001, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+0.574 (+/-0.196) for {'clf__gamma': 0.1, 'pca__n_components': 150, 'clf__C': 0.0001, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+0.574 (+/-0.196) for {'clf__gamma': 0.1, 'pca__n_components': 200, 'clf__C': 0.0001, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+0.574 (+/-0.196) for {'clf__gamma': 1, 'pca__n_components': 150, 'clf__C': 0.0001, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+0.574 (+/-0.196) for {'clf__gamma': 1, 'pca__n_components': 200, 'clf__C': 0.0001, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+0.574 (+/-0.196) for {'clf__gamma': 10, 'pca__n_components': 150, 'clf__C': 0.0001, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+0.574 (+/-0.196) for {'clf__gamma': 10, 'pca__n_components': 200, 'clf__C': 0.0001, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+0.574 (+/-0.196) for {'clf__gamma': 1e-05, 'pca__n_components': 150, 'clf__C': 0.0001, 'clf__class_weight': {0: 9, 1: 1}, 'clf__kernel': 'linear'}
+0.574 (+/-0.196) for {'clf__gamma': 1e-05, 'pca__n_components': 200, 'clf__C': 0.0001, 'clf__class_weight': {0: 9, 1: 1}, 'clf__kernel': 'linear'}
+
+{'clf__gamma': 1e-05, 'pca__n_components': 150, 'clf__C': 1e-05, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+log_loss test data: 0.301868619734
+log_loss train data: 0.315915422109
+
+
+With bagging:
+'pca__n_components': 150, 'clf__C': 1e-03, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+log_loss test data: 0.34493424712
+log_loss train data: 0.279030495887
+
+'pca__n_components': 150, 'clf__C': 1e-05, 'clf__class_weight': {0: 6, 1: 1}, 'clf__kernel': 'linear'}
+log_loss test data: 0.319513170906
+log_loss train data: 0.340767853706
+
+POSTPROCESSING
+0.574 (+/-0.196) for {'kernel': 'linear', 'C': 0.0001, 'class_weight': {0: 9, 1: 1}}
+{'kernel': 'linear', 'C': 0.0001, 'class_weight': {0: 9, 1: 1}}
+log_loss test data: 0.275244543346
+log_loss train data: 0.20285012236
