@@ -60,7 +60,7 @@ health_target = y_train[:, 2]
 # ------------
 print 'Performing grid search sex'
 
-pipe = Pipeline([('cut', CenterCutCubes(size_cubes=3, plane_jump=1, x1=20, y1=20, z1=20, x2=150, y2=180, z2=150)),
+pipe = Pipeline([('cut', CenterCutCubes(size_cubes=5, plane_jump=2, x1=20, y1=20, z1=20, x2=150, y2=180, z2=150)),
                  ('var', VarianceThreshold()),
                  ('sel', Select(type='mutual_info', threshold=0.1)),
                  ('scl', StandardScaler()),
@@ -71,14 +71,15 @@ gs_sex = GridSearchCV(pipe,
                     param_grid={'clf__C' : [0.001, 0.01, 0.1],
                                 'clf__kernel': ['linear','rbf'],
                                 'clf__gamma': [0.01, 0.1, 1]},
-                    scoring=make_scorer(matthews_corrcoef))
+                    scoring=make_scorer(matthews_corrcoef),
+                    n_jobs = -1)
 
 gs_sex.fit(X_train, sex_target)
 
 sex_model = gs_sex.best_estimator_
 
 print "Train - hamming loss :", hamming_loss(sex_target, gs_sex.predict(X_train))
-print "Test - hamming loss :", hamming_loss(y_test[:,0], gs_sex.predict(X_test))
+print "Test - hamming loss :", hamming_loss(y_test[:, 0], gs_sex.predict(X_test))
 
 # ------------
 # Age model
@@ -86,7 +87,7 @@ print "Test - hamming loss :", hamming_loss(y_test[:,0], gs_sex.predict(X_test))
 
 print 'Performing grid search age'
 
-pipe = Pipeline([('cut', CenterCutCubes(size_cubes=3, plane_jump=1, x1=20, y1=20, z1=20, x2=150, y2=180, z2=150)),
+pipe = Pipeline([('cut', CenterCutCubes(size_cubes=5, plane_jump=2, x1=20, y1=20, z1=20, x2=150, y2=180, z2=150)),
                  ('var', VarianceThreshold()),
                  ('sel', Select(type='mutual_info', threshold=0.1)),
                  ('scl', StandardScaler()),
@@ -95,16 +96,17 @@ pipe = Pipeline([('cut', CenterCutCubes(size_cubes=3, plane_jump=1, x1=20, y1=20
 
 gs_age = GridSearchCV(pipe,
                       param_grid={'clf__C' : [0.001, 0.01, 0.1],
-                                'clf__kernel': ['linear','rbf'],
-                                'clf__gamma': [0.01, 0.1, 1]},
-                      scoring=make_scorer(matthews_corrcoef))
+                                    'clf__kernel': ['linear','rbf'],
+                                    'clf__gamma': [0.01, 0.1, 1]},
+                      scoring=make_scorer(matthews_corrcoef),
+                      n_jobs=-1)
 
 gs_age.fit(X_train, age_target)
 
 age_model = gs_age.best_estimator_
 
 print "Train - hamming loss :", hamming_loss(age_target, gs_age.predict(X_train))
-print "Test - hamming loss :", hamming_loss(y_test[:,1], gs_age.predict(X_test))
+print "Test - hamming loss :", hamming_loss(y_test[:, 1], gs_age.predict(X_test))
 
 # ------------
 # Health model
@@ -112,7 +114,7 @@ print "Test - hamming loss :", hamming_loss(y_test[:,1], gs_age.predict(X_test))
 
 print 'Performing grid search health'
 
-pipe = Pipeline([('cut', CenterCutCubes(size_cubes=3, plane_jump=1, x1=20, y1=20, z1=20, x2=150, y2=180, z2=150)),
+pipe = Pipeline([('cut', CenterCutCubes(size_cubes=5, plane_jump=2, x1=20, y1=20, z1=20, x2=150, y2=180, z2=150)),
                  ('var', VarianceThreshold()),
                  ('sel', Select(type='mutual_info', threshold=0.1)),
                  ('scl', StandardScaler()),
@@ -120,16 +122,17 @@ pipe = Pipeline([('cut', CenterCutCubes(size_cubes=3, plane_jump=1, x1=20, y1=20
                  ('clf', SVC())])
 
 gs_health = GridSearchCV(pipe,
-                        param_grid={'clf__C' : [0.001, 0.01, 0.1],
-                                'clf__kernel': ['linear','rbf'],
-                                'clf__gamma': [0.01, 0.1, 1]},
-                        scoring=make_scorer(matthews_corrcoef))
+                         param_grid={'clf__C' : [0.001, 0.01, 0.1],
+                                     'clf__kernel': ['linear','rbf'],
+                                     'clf__gamma': [0.01, 0.1, 1]},
+                         scoring=make_scorer(matthews_corrcoef),
+                         n_jobs=-1)
 
 gs_health.fit(X_train, health_target)
 health_model = gs_health.best_estimator_
 
 print "Train - hamming loss :", hamming_loss(health_target, gs_health.predict(X_train))
-print "Test - hamming loss :", hamming_loss(y_test[:,2], gs_health.predict(X_test))
+print "Test - hamming loss :", hamming_loss(y_test[:, 2], gs_health.predict(X_test))
 
 # ----------------------------------
 # Calculating scores for all classes
