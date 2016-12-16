@@ -48,7 +48,7 @@ X_train, X_test, y_train, y_test = \
 # X_train = Data
 # y_train = Targets
 
-sex_target = y_train[:, 0]
+gender_target = y_train[:, 0]
 age_target = y_train[:, 1]
 health_target = y_train[:, 2]
 
@@ -56,9 +56,9 @@ health_target = y_train[:, 2]
 
 
 # ------------
-# Sex model
+# Gender model
 # ------------
-print 'Performing grid search sex'
+print 'Performing grid search gender'
 
 pipe = Pipeline([('cut', CenterCutCubes(size_cubes=5, plane_jump=2, x1=20, y1=20, z1=20, x2=150, y2=180, z2=150)),
                  ('var', VarianceThreshold()),
@@ -67,19 +67,19 @@ pipe = Pipeline([('cut', CenterCutCubes(size_cubes=5, plane_jump=2, x1=20, y1=20
                  # ('pca', PCA(n_components=50)),
                  ('clf', SVC())])
 
-gs_sex = GridSearchCV(pipe,
+gs_gender = GridSearchCV(pipe,
                     param_grid={'clf__C' : [0.001, 0.01, 0.1],
                                 'clf__kernel': ['linear','rbf'],
                                 'clf__gamma': [0.01, 0.1, 1]},
                     scoring=make_scorer(matthews_corrcoef),
                     n_jobs = -1)
 
-gs_sex.fit(X_train, sex_target)
+gs_gender.fit(X_train, gender_target)
 
-sex_model = gs_sex.best_estimator_
+gender_model = gs_gender.best_estimator_
 
-print "Train - hamming loss :", hamming_loss(sex_target, gs_sex.predict(X_train))
-print "Test - hamming loss :", hamming_loss(y_test[:, 0], gs_sex.predict(X_test))
+print "Train - hamming loss :", hamming_loss(gender_target, gs_gender.predict(X_train))
+print "Test - hamming loss :", hamming_loss(y_test[:, 0], gs_gender.predict(X_test))
 
 # ------------
 # Age model
@@ -137,8 +137,8 @@ print "Test - hamming loss :", hamming_loss(y_test[:, 2], gs_health.predict(X_te
 # ----------------------------------
 # Calculating scores for all classes
 # ----------------------------------
-y_all_train = np.hstack((sex_model.predict(X_train), age_model.predict(X_train), health_model.predict(X_train)))
-y_all_test = np.hstack((sex_model.predict(X_test), age_model.predict(X_test), health_model.predict(X_test)))
+y_all_train = np.hstack((gender_model.predict(X_train), age_model.predict(X_train), health_model.predict(X_train)))
+y_all_test = np.hstack((gender_model.predict(X_test), age_model.predict(X_test), health_model.predict(X_test)))
 
 print "Train - hamming loss :", hamming_loss(y_train.flatten(order='C'), y_all_train.flatten(order='C'))
 print "Test - hamming loss :", hamming_loss(y_test.flatten(order='C'), y_all_test.flatten(order='C'))
@@ -159,7 +159,7 @@ for i in range(1, 139):
 
 #GENDER (gender is not actually binary - progressive thought leads to a progressive society
 
-gender = sex_model.predict(Data_test)
+gender = gender_model.predict(Data_test)
 age = age_model.predict(Data_test)
 health = health_model.predict(Data_test)
 
