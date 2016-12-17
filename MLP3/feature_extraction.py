@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 
 class CenterCutCubes(BaseEstimator, TransformerMixin):
-    def __init__(self, size_cubes, plane_jump=1, x1=50, x2=120, y1=50, y2=150, z1=50, z2=100, multiple = False):
+    def __init__(self, size_cubes, plane_jump=1, x1=50, x2=120, y1=50, y2=150, z1=50, z2=100, negative=False):
         self.cut = []
         self.descriptor = []
         self.x1 = x1
@@ -21,7 +21,7 @@ class CenterCutCubes(BaseEstimator, TransformerMixin):
         self.z2 = z2
         self.size_cubes = size_cubes
         self.plane_jump = plane_jump
-        self.multiple = multiple
+        self.negative = negative
 
     def fit(self, X_train, y=None):
 
@@ -29,24 +29,37 @@ class CenterCutCubes(BaseEstimator, TransformerMixin):
 
     def transform(self, X_train, y=None):
         cut = []
-        # if self.multiple:
-        #     for n in X_train:
-        #         cut.append(np.array([n[20:50, 20:180, 20:150], n[120:150, 20:180, 20:150], n[]]))
-        # else:
-        for n in X_train:
-            cut.append(n[self.x1:self.x2, self.y1:self.y2, self.z1:self.z2])
-        self.cut = cut
-        descriptor = []
-        for n in cut:
-            int_cubes = []
-            for i in range(0, n.shape[0], self.size_cubes*self.plane_jump):
-                for j in range(0, n.shape[1], self.size_cubes):
-                    for k in range(0, n.shape[2], self.size_cubes):
-                        cube = n[i:i + self.size_cubes, j:j + self.size_cubes, k:k + self.size_cubes]
-                        int_cubes.append(self._get_array_intensity_max(cube))
-            descriptor.append(int_cubes)
+        if self.negative:
+            for n in X_train:
+                cut.append(np.array([n[20:50, 20:180, 20:150], n[120:150, 20:180, 20:150], n[20:150, 20:50, 20:150], n[20:150, 150:180, 20:150], n[20:150, 20:180, 20:50], n[20:150, 20:180, 100:150]]))
+            self.cut = cut
+            descriptor = []
+            for n in cut:
+                int_cubes = []
+                for l in n:
+                    for i in range(0, l.shape[0], self.size_cubes * self.plane_jump):
+                        for j in range(0, l.shape[1], self.size_cubes):
+                            for k in range(0, l.shape[2], self.size_cubes):
+                                cube = l[i:i + self.size_cubes, j:j + self.size_cubes, k:k + self.size_cubes]
+                                int_cubes.append(self._get_array_intensity_max(cube))
+                descriptor.append(int_cubes)
+
+        else:
+            for n in X_train:
+                cut.append(n[self.x1:self.x2, self.y1:self.y2, self.z1:self.z2])
+            self.cut = cut
+            descriptor = []
+            for n in cut:
+                int_cubes = []
+                for i in range(0, n.shape[0], self.size_cubes*self.plane_jump):
+                    for j in range(0, n.shape[1], self.size_cubes):
+                        for k in range(0, n.shape[2], self.size_cubes):
+                            cube = n[i:i + self.size_cubes, j:j + self.size_cubes, k:k + self.size_cubes]
+                            int_cubes.append(self._get_array_intensity_max(cube))
+                descriptor.append(int_cubes)
 
         self.descriptor = np.asarray(descriptor)
+        print 'descriptor dimensions', self.descriptor.shape
         return self.descriptor
 
     def _get_array_intensity_sum(self, array):

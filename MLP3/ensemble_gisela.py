@@ -1,7 +1,7 @@
 from skimage import measure
 import numpy as np
 import nibabel as nib
-from feature_extraction import CenterCutCubes, PvalSelect, Select
+from feature_extraction import CenterCutCubes, Select
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -9,22 +9,9 @@ from sklearn.pipeline import Pipeline
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.metrics import *
 from sklearn.model_selection import GridSearchCV
-from sklearn.svm import SVC
-from sklearn.decomposition import PCA
-from sklearn.naive_bayes import GaussianNB
-from sklearn.ensemble import BaggingClassifier
 from sklearn.metrics import hamming_loss
-from sklearn import svm
-from sklearn.multiclass import OneVsRestClassifier
-from sklearn.svm import LinearSVC, SVC
-from sklearn.preprocessing import MultiLabelBinarizer
+from sklearn.svm import SVC
 
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.multioutput import MultiOutputClassifier\
-
-from scipy import ndimage
-from sklearn.multiclass import OneVsRestClassifier
-from sklearn.multiclass import OneVsOneClassifier
 
 
 Targets = np.genfromtxt("data/targets.csv", delimiter=',')
@@ -52,15 +39,12 @@ gender_target = y_train[:, 0]
 age_target = y_train[:, 1]
 health_target = y_train[:, 2]
 
-
-
-
 # ------------
 # Gender model
 # ------------
 print 'Performing grid search gender'
 
-pipe = Pipeline([('cut', CenterCutCubes(size_cubes=5, plane_jump=2, x1=20, y1=20, z1=20, x2=150, y2=180, z2=150)),
+pipe = Pipeline([('cut', CenterCutCubes(size_cubes=5, plane_jump=1, negative=True)),
                  ('var', VarianceThreshold()),
                  ('sel', Select(type='mutual_info', threshold=0.1)),
                  ('scl', StandardScaler()),
@@ -68,11 +52,12 @@ pipe = Pipeline([('cut', CenterCutCubes(size_cubes=5, plane_jump=2, x1=20, y1=20
                  ('clf', SVC())])
 
 gs_gender = GridSearchCV(pipe,
-                    param_grid={'clf__C' : [0.001, 0.01, 0.1],
-                                'clf__kernel': ['linear','rbf'],
-                                'clf__gamma': [0.01, 0.1, 1]},
+                    param_grid={'clf__C': [0.1],
+                                'clf__kernel': ['linear']},
                     scoring=make_scorer(matthews_corrcoef),
-                    n_jobs = -1)
+                    n_jobs=-1)
+
+
 
 gs_gender.fit(X_train, gender_target)
 
@@ -95,11 +80,10 @@ pipe = Pipeline([('cut', CenterCutCubes(size_cubes=5, plane_jump=2, x1=20, y1=20
                  ('clf', SVC())])
 
 gs_age = GridSearchCV(pipe,
-                      param_grid={'clf__C' : [0.001, 0.01, 0.1],
-                                    'clf__kernel': ['linear','rbf'],
-                                    'clf__gamma': [0.01, 0.1, 1]},
-                      scoring=make_scorer(matthews_corrcoef),
-                      n_jobs=-1)
+                    param_grid={'clf__C': [0.1],
+                                'clf__kernel': ['linear']},
+                    scoring=make_scorer(matthews_corrcoef),
+                    n_jobs=-1)
 
 gs_age.fit(X_train, age_target)
 
@@ -122,11 +106,10 @@ pipe = Pipeline([('cut', CenterCutCubes(size_cubes=5, plane_jump=2, x1=20, y1=20
                  ('clf', SVC())])
 
 gs_health = GridSearchCV(pipe,
-                         param_grid={'clf__C' : [0.001, 0.01, 0.1],
-                                     'clf__kernel': ['linear','rbf'],
-                                     'clf__gamma': [0.01, 0.1, 1]},
-                         scoring=make_scorer(matthews_corrcoef),
-                         n_jobs=-1)
+                    param_grid={'clf__C': [0.1],
+                                'clf__kernel': ['linear']},
+                    scoring=make_scorer(matthews_corrcoef),
+                    n_jobs=-1)
 
 gs_health.fit(X_train, health_target)
 health_model = gs_health.best_estimator_
