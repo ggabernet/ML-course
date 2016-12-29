@@ -39,8 +39,7 @@ Data = []
 for i in range(1, 279):
     imagefile = nib.load("data/set_train/train_"+str(i)+".nii")
     image = imagefile.get_data()
-    I = image[:, :, :, 0]
-    I = I.flatten(order='C')
+    I = image[:,:,:,0]
     imagefile.uncache()
     Data.append(np.asarray(I))
 
@@ -54,15 +53,15 @@ X_train, X_test, y_train, y_test = \
 
 print 'Fitting process started'
 
-forest = SVC(kernel='linear', C=5)
+forest = OneVsRestClassifier(SVC())
 
 clf = MultiOutputClassifier(forest)
 
-pipe = Pipeline([#('cut', CenterCutCubes(size_cubes=10, plane_jump=1, x1=50, y1=80, z1=50, x2=120, y2=150, z2=100)),
+pipe = Pipeline([('cut', CenterCutCubes(size_cubes=5, plane_jump=1, x1=50, y1=45, z1=70, x2=160, y2=130, z2=140)),
                   #('var', VarianceThreshold()),
                   #('sel', Select(type='mutual_info', threshold=0.1)),
                   #('scl', StandardScaler()),
-                  #('pca', PCA(n_components=15)),
+                  #('pca', PCA(n_components=50)),
                   ('clf',clf)])
 print 'pipe done'
 
@@ -75,12 +74,12 @@ Data_test = []
 for i in range(1, 139):
     imagefile = nib.load("data/set_test/test_"+str(i)+".nii")
     image = imagefile.get_data()
-    I = image[:,:,:, 0]
-    I = I.flatten(order='C')
+    I = image[:,:,:,0]
     imagefile.uncache()
     Data_test.append(np.asarray(I))
 
 output_data = pipe.predict(Data_test)
+
 
 ###########################################
 #      WRITING DATA IN OUTPUT FORMAT      #
