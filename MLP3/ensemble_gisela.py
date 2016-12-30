@@ -11,6 +11,8 @@ from sklearn.metrics import *
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import hamming_loss
 from sklearn.svm import SVC
+from sklearn.ensemble import BaggingClassifier
+from sklearn.decomposition import PCA
 
 
 
@@ -35,36 +37,42 @@ X_train, X_test, y_train, y_test = \
 # X_train = Data
 # y_train = Targets
 
-gender_target = y_train[:, 0]
-age_target = y_train[:, 1]
-health_target = y_train[:, 2]
+gender_target = list(y_train[:, 0])
+print len(gender_target)
+age_target = list(y_train[:, 1])
+health_target = list(y_train[:, 2])
 
 # ------------
 # Gender model
 # ------------
 print 'Performing grid search gender'
 
-pipe = Pipeline([('cut', CenterCutCubes(size_cubes=5, plane_jump=1, negative=True)),
+pipe_gender = Pipeline([('cut', CenterCutCubes(size_cubes=3, plane_jump=2, negative=False)),
                  ('var', VarianceThreshold()),
-                 ('sel', Select(type='mutual_info', threshold=0.1)),
+                 ('sel', Select(type='mutual_info', threshold=0.001)),
                  ('scl', StandardScaler()),
-                 # ('pca', PCA(n_components=50)),
-                 ('clf', SVC())])
-
-gs_gender = GridSearchCV(pipe,
-                    param_grid={'clf__C': [0.1],
-                                'clf__kernel': ['linear']},
-                    scoring=make_scorer(matthews_corrcoef),
-                    n_jobs=-1)
+                 #('pca', PCA(n_components=150))
+				 ])
 
 
+X_train_trans = pipe_gender.fit_transform(X_train, gender_target)
+print X_train_trans.shape
 
-gs_gender.fit(X_train, gender_target)
+X_test_trans = pipe_gender.transform(X_test)
 
-gender_model = gs_gender.best_estimator_
+bagging = BaggingClassifier(base_estimator=SVC(C=0.1, kernel='linear'),
+                            n_estimators=10,
+                            max_samples=0.5,
+                            max_features=1.0,
+                            bootstrap=True,
+                            n_jobs=-1,
+                            random_state=42,
+                            verbose=1)
 
-print "Train - hamming loss :", hamming_loss(gender_target, gs_gender.predict(X_train))
-print "Test - hamming loss :", hamming_loss(y_test[:, 0], gs_gender.predict(X_test))
+bagging.fit(X_train_trans, gender_target)
+
+print "Train - hamming loss :", hamming_loss(gender_target, bagging.predict(X_train_trans))
+print "Test - hamming loss :", hamming_loss(y_test[:, 0], bagging.predict(X_test_trans))
 
 # ------------
 # Age model
@@ -106,7 +114,7 @@ pipe = Pipeline([('cut', CenterCutCubes(size_cubes=5, plane_jump=2, x1=20, y1=20
                  ('clf', SVC())])
 
 gs_health = GridSearchCV(pipe,
-                    param_grid={'clf__C': [0.1],
+                    param_grid={'clf__C': [0.001],
                                 'clf__kernel': ['linear']},
                     scoring=make_scorer(matthews_corrcoef),
                     n_jobs=-1)
@@ -120,8 +128,8 @@ print "Test - hamming loss :", hamming_loss(y_test[:, 2], gs_health.predict(X_te
 # ----------------------------------
 # Calculating scores for all classes
 # ----------------------------------
-y_all_train = np.hstack((gender_model.predict(X_train), age_model.predict(X_train), health_model.predict(X_train)))
-y_all_test = np.hstack((gender_model.predict(X_test), age_model.predict(X_test), health_model.predict(X_test)))
+y_all_train = np.hstack((bagging.predict(X_train_trans), age_model.predict(X_train), health_model.predict(X_train)))
+y_all_test = np.hstack((bagging.predict(X_test_trans), age_model.predict(X_test), health_model.predict(X_test)))
 
 print "Train - hamming loss :", hamming_loss(y_train.flatten(order='C'), y_all_train.flatten(order='C'))
 print "Test - hamming loss :", hamming_loss(y_test.flatten(order='C'), y_all_test.flatten(order='C'))
@@ -141,8 +149,8 @@ for i in range(1, 139):
 ###########################################
 
 #GENDER (gender is not actually binary - progressive thought leads to a progressive society
-
-gender = gender_model.predict(Data_test)
+Data_test_trans = pipe_gender.transform(Data_test)
+gender = bagging.predict(Data_test_trans)
 age = age_model.predict(Data_test)
 health = health_model.predict(Data_test)
 
