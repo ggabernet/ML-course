@@ -31,7 +31,7 @@ target_file=open('data/targets.csv','r')
 for lines in target_file:
     lines = lines.strip('\n')
     lines = lines.split(',')
-    Targets.append(lines)
+    Targets.append([int(i) for i in lines])
 
 Targets = np.asarray(Targets, dtype=int)
 
@@ -53,15 +53,16 @@ X_train, X_test, y_train, y_test = \
 
 print 'Fitting process started'
 
-forest = OneVsRestClassifier(SVC())
+
+forest = RandomForestClassifier(n_estimators=100, random_state=1)
 
 clf = MultiOutputClassifier(forest)
 
-pipe = Pipeline([('cut', CenterCutCubes(size_cubes=5, plane_jump=1, x1=50, y1=45, z1=70, x2=160, y2=130, z2=140)),
-                  #('var', VarianceThreshold()),
-                  #('sel', Select(type='mutual_info', threshold=0.1)),
-                  #('scl', StandardScaler()),
-                  #('pca', PCA(n_components=50)),
+pipe = Pipeline([('cut', CenterCutCubes(size_cubes=10, plane_jump=1, x1=50, y1=80, z1=50, x2=120, y2=150, z2=100)),
+                  ('var', VarianceThreshold()),
+                  ('sel', Select(type='mutual_info', threshold=0.1)),
+                  ('scl', StandardScaler()),
+                  #('pca', PCA(n_components=15)),
                   ('clf',clf)])
 print 'pipe done'
 
