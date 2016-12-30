@@ -33,13 +33,13 @@ for lines in target_file:
     lines = lines.split(',')
     Targets.append([int(i) for i in lines])
 
-Targets = np.asarray(Targets)
+Targets = np.asarray(Targets,dtype=int)
 
 Data = []
 for i in range(1, 279):
     imagefile = nib.load("data/set_train/train_"+str(i)+".nii")
     image = imagefile.get_data()
-    I = image[:,:,:, 0]
+    I = image[:,:,:,0]
     imagefile.uncache()
     Data.append(np.asarray(I))
 
@@ -52,6 +52,7 @@ X_train, X_test, y_train, y_test = \
 #y_train = Targets
 
 print 'Fitting process started'
+
 
 forest = RandomForestClassifier(n_estimators=100, random_state=1)
 
@@ -74,12 +75,12 @@ Data_test = []
 for i in range(1, 139):
     imagefile = nib.load("data/set_test/test_"+str(i)+".nii")
     image = imagefile.get_data()
-    I = image[:,:,:, 0]
-    I = I.flatten(order='C')
+    I = image[:,:,:,0]
     imagefile.uncache()
     Data_test.append(np.asarray(I))
 
 output_data = pipe.predict(Data_test)
+
 
 ###########################################
 #      WRITING DATA IN OUTPUT FORMAT      #
