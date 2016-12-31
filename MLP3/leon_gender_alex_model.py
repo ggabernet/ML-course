@@ -33,6 +33,9 @@ from scipy.ndimage import *
 from collections import Counter
 from sklearn.feature_selection import SelectFromModel
 from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.model_selection import cross_val_score
+from sklearn import metrics
+
 
 Targets = []
 Target_label = []
@@ -135,7 +138,7 @@ print 'Fitting process started'
 
 from sklearn.ensemble import AdaBoostClassifier
 
-clf = OneVsRestClassifier(SVC(kernel="linear",C=5))
+clf = OneVsRestClassifier(SVC(kernel="linear",C=1))
 
 #pipe = Pipeline([#('cut', CenterCutCubes(size_cubes=5, plane_jump=1, x1=50, y1=80, z1=50, x2=120, y2=150, z2=100)),
                 #('var', VarianceThreshold()),
@@ -152,7 +155,9 @@ print 'pipe done'
 X_train, X_test, y_train, y_test = \
       train_test_split(Data, Targets, test_size=0.33, random_state=42)#, stratify=Targets)
 
-clff = ExtraTreesClassifier(n_estimators=250,bootstrap=True)
+X_train, y_train = Data, Targets
+
+clff = ExtraTreesClassifier(n_estimators=500,bootstrap=True,random_state=24)
 clff = clff.fit(X_train, np.array(y_train))
 model = SelectFromModel(clff, prefit=True)
 X_train = model.transform(X_train)
@@ -161,11 +166,10 @@ Data_test = model.transform(Data_test)
 print X_train.shape
 print X_test.shape
 
-#
-#X_train = Data
-#y_train = Targets
 
 pipe.fit(X_train,y_train)
+CVscores = cross_val_score(pipe, X_train, y_train, cv=278, scoring=make_scorer(hamming_loss))
+print "CV - hamming loss:", np.mean(CVscores), np.std(CVscores)
 print "Train - hamming loss :", hamming_loss(y_train,pipe.predict(X_train))
 print "Test - hamming loss :", hamming_loss(y_test,pipe.predict(X_test))
 
