@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import hamming_loss
 from sklearn.svm import LinearSVC, SVC
-from sklearn.multiclass import OneVsRestClassifier, OneVsOneClassifier
+from sklearn.multiclass import OneVsRestClassifier
 from scipy.ndimage import *
 from sklearn.feature_selection import SelectFromModel
 from sklearn.ensemble import ExtraTreesClassifier
@@ -14,6 +14,8 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import make_scorer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.pipeline import Pipeline
+from sklearn.cross_decomposition import CCA
+from sklearn.decomposition import PCA
 from feature_extraction import CovAlex, CenterCutCubes
 
 Targets = []
@@ -75,31 +77,33 @@ print "processed images"
 X_train = Data
 y_train = Targets
 
-clff = ExtraTreesClassifier(n_estimators=250, bootstrap=True)
-pipe_features = Pipeline([#('cubes', CenterCutCubes(size_cubes=1, plane_jump=1, x1=0, x2=X_train[0].shape[0], y1=0, y2=X_train[0].shape[1], z1=0, z2=X_train[0].shape[2])),
-                        ('CovSel', CovAlex()),
-                        ('RFselection', SelectFromModel(clff, prefit=False))
-                          ])
+clff = ExtraTreesClassifier(n_estimators=250, bootstrap=False, random_state=24)
+pipe_features = Pipeline([('CovSel', CovAlex()),
+                        ('RFselection', SelectFromModel(clff, prefit=False, threshold="1.5*mean"))])
 
 X_train = pipe_features.fit_transform(X_train, y_train)
 #X_test = pipe_features.transform(X_test)
 Data_test = pipe_features.transform(Data_test)
 print X_train.shape
+print y_train.shape
 #print X_test.shape
 
 
 print 'Fitting process started'
 
 
-clf = OneVsOneClassifier(SVC(C=5, kernel='linear'))
+clf = OneVsRestClassifier(SVC(C=5, kernel='linear'))
 
-gs = GridSearchCV(clf, param_grid={'estimator__C': [5]}, scoring=make_scorer(hamming_loss), cv=10, n_jobs=-1)
+gs = GridSearchCV(clf, param_grid={'estimator__C': [5]}, scoring=make_scorer(hamming_loss), cv=10, n_jobs=1)
 gs.fit(X_train, y_train)
 
 #pipe.fit(X_train, y_train)
 
 pipe = gs.best_estimator_
-print gs.cv_results_
+print 'train score'
+print gs.cv_results_['mean_train_score'], '+/-', gs.cv_results_['std_train_score']
+print 'test score'
+print gs.cv_results_['mean_test_score'], '+/-', gs.cv_results_['std_test_score']
 print gs.best_params_
 
 print 'pipe done'

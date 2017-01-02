@@ -7,6 +7,7 @@ import scipy
 from scipy.stats import pearsonr
 from sklearn.feature_selection import mutual_info_classif, f_classif, chi2
 import matplotlib.pyplot as plt
+import math
 
 
 class CenterCutCubes(BaseEstimator, TransformerMixin):
@@ -59,7 +60,6 @@ class CenterCutCubes(BaseEstimator, TransformerMixin):
                 descriptor.append(int_cubes)
 
         self.descriptor = np.asarray(descriptor)
-        print 'descriptor dimensions', self.descriptor.shape
         return self.descriptor
 
     def _get_array_intensity_sum(self, array):
@@ -200,6 +200,39 @@ class CovSel(BaseEstimator, TransformerMixin):
 
     def transform(self, X, y=None):
         return X[:, self.indices_]
+
+class CovAlex(BaseEstimator, TransformerMixin):
+    def __init__(self, corval=1500):
+        self.descriptor = []
+        self.index = []
+        self.corval = corval
+
+    def fit(self, X, y):
+        Data = np.transpose(np.asarray(X))
+        Targets = np.asarray(y, dtype=float)
+
+        index = 0
+        ignore_index = []
+        cov_matrix = []
+
+        cov_2 = Targets - np.asarray([np.mean(Targets, axis=0), ] * X.shape[0])
+
+        for pixel in Data:
+            # print 'pixel', index+1
+            cov_1 = (pixel - np.mean(pixel) * np.ones((1, len(pixel))))
+            covarience_value = abs(np.mean(np.dot(cov_1, cov_2)))
+            correlation_value = covarience_value / (np.var(pixel) * np.var(Targets))
+            if correlation_value < self.corval or math.isnan(correlation_value) is True:
+                ignore_index.append(index)
+                cov_matrix.append(0)
+            else:
+                cov_matrix.append(abs(np.mean(np.dot(cov_1, cov_2))))
+            index = index + 1
+        self.index = ignore_index
+        return self
+
+    def transform(self, X, y=None):
+        return np.delete(X, self.index, axis=1)
 
 class Intensities:
     def __init__(self):
