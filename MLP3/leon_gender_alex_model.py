@@ -78,7 +78,7 @@ y_train = Targets
 clff = ExtraTreesClassifier(n_estimators=250, bootstrap=True)
 pipe_features = Pipeline([#('cubes', CenterCutCubes(size_cubes=1, plane_jump=1, x1=0, x2=X_train[0].shape[0], y1=0, y2=X_train[0].shape[1], z1=0, z2=X_train[0].shape[2])),
                         ('CovSel', CovAlex()),
-                        ('RFselection', SelectFromModel(clff, prefit=False))
+                        ('RFselection', SelectFromModel(clff, prefit=False, threshold=))
                           ])
 
 X_train = pipe_features.fit_transform(X_train, y_train)
@@ -91,7 +91,7 @@ print X_train.shape
 print 'Fitting process started'
 
 
-clf = OneVsOneClassifier(SVC(C=5, kernel='linear'))
+clf = OneVsRestClassifier(SVC(kernel='linear'))
 
 gs = GridSearchCV(clf, param_grid={'estimator__C': [5]}, scoring=make_scorer(hamming_loss), cv=10, n_jobs=-1)
 gs.fit(X_train, y_train)
